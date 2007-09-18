@@ -1,6 +1,6 @@
 %define name 		lapack
 %define version 	3.0
-%define release 	%mkrel 20
+%define release 	%mkrel 21
 %define major 		3.0
 %define libname_orig	lib%{name}
 %define libname 	%mklibname %{name} %{major}
