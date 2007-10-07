@@ -1,6 +1,6 @@
 %define name 		lapack
 %define version 	3.0
-%define release 	%mkrel 21
+%define release 	%mkrel 22
 %define major 		3.0
 %define libname_orig	lib%{name}
 %define libname 	%mklibname %{name} %{major}
@@ -141,5 +141,5 @@ rm -fr %{buildroot}
 %files -n %{libname}-devel
 %defattr(-,root,root)
 %{_libdir}/liblapack.so
-%{_libdir}/liblapack.a
+%{_libdir}/liblapack*.a
 %{_mandir}/man3/*
