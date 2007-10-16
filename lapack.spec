@@ -1,6 +1,6 @@
 %define name 		lapack
 %define version 	3.0
-%define release 	%mkrel 22
+%define release 	%mkrel 23
 %define major 		3.0
 %define libname_orig	lib%{name}
 %define libname 	%mklibname %{name} %{major}
@@ -99,6 +99,10 @@ necessary to develop or compile applications.
 %setup -q -n LAPACK
 bzcat %{SOURCE1} > Makefile
 %setup -q -D -T -a 2 -n LAPACK
+
+# needed due to gfortran issues:
+sed -si 's/EXTERNAL /INTRINSIC/' SRC/second.f
+sed -si 's/EXTERNAL /INTRINSIC/' SRC/dsecnd.f
 
 %build
 %make F77="%{f77}" \
