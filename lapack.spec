@@ -1,11 +1,12 @@
 %define name 		lapack
 %define version 	3.0
-%define release 	%mkrel 23
+%define release 	%mkrel 24
 %define major 		3.0
 %define libname_orig	lib%{name}
 %define libname 	%mklibname %{name} %{major}
 %define oldmajor 	3
 %define oldlibname 	%mklibname %{name} %{oldmajor}
+%define develname	%mklibname -d %{name}
 
 %if %{mdkversion} <= 1020
 %define f77	g77
@@ -53,7 +54,6 @@ Summary: 	LAPACK libraries for linear algebra
 Group:		Sciences/Mathematics
 Provides:	lib%{name} = %{version}-%{release}
 Obsoletes:	%{oldlibname}
-Provides:	%{oldlibname}
 
 %description -n %{libname}
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
@@ -70,16 +70,15 @@ is coded in Fortran77.
 
 The lapack package provides the dynamic libraries for LAPACK.
 
-%package -n	%{libname}-devel
+%package -n	%{develname}
 Summary: 	LAPACK static library
 Group:		Sciences/Mathematics
 Requires: 	%{libname} = %{version}
 Provides:	%{name}-devel = %{version}-%{release}
-Provides: 	lib%{name}-devel = %{version}-%{release}
-Obsoletes:	%{oldlibname}-devel
-Provides:	%{oldlibname}-devel
+Obsoletes:	%mklibname -d %{name} %{oldmajor}
+Obsoletes:	%mklibname -d %{name} %{major}
 
-%description -n	%{libname}-devel
+%description -n	%{develname}
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
 linear algebra.  LAPACK provides routines for solving systems of
 simultaneous linear equations, least-squares solutions of linear
@@ -142,7 +141,7 @@ rm -fr %{buildroot}
 %doc README 
 %{_libdir}/liblapack.so.*
 
-%files -n %{libname}-devel
+%files -n %{develname}
 %defattr(-,root,root)
 %{_libdir}/liblapack.so
 %{_libdir}/liblapack*.a
