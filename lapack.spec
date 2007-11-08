@@ -1,10 +1,9 @@
 %define name 		lapack
-%define version 	3.0
-%define release 	%mkrel 24
-%define major 		3.0
-%define libname_orig	lib%{name}
+%define version 	3.1.1
+%define release 	%mkrel 1
+%define major 		3.1
 %define libname 	%mklibname %{name} %{major}
-%define oldmajor 	3
+%define oldmajor 	3.0
 %define oldlibname 	%mklibname %{name} %{oldmajor}
 %define develname	%mklibname -d %{name}
 
@@ -25,7 +24,6 @@ Group:		Sciences/Mathematics
 URL: 		http://www.netlib.org/lapack/
 Source0: 	http://www.netlib.org/lapack/%{name}.tar.bz2
 Source1: 	%{name}.makefile.bz2
-Source2: 	http://www.netlib.org/lapack/manpages.tar.bz2
 %if %{mdkversion} <= 1020
 BuildRequires:	gcc-g77
 %else
@@ -95,13 +93,14 @@ This package contains the headers and development libraries
 necessary to develop or compile applications.
 
 %prep
-%setup -q -n LAPACK
+%setup -q
 bzcat %{SOURCE1} > Makefile
-%setup -q -D -T -a 2 -n LAPACK
 
-# needed due to gfortran issues:
-sed -si 's/EXTERNAL /INTRINSIC/' SRC/second.f
-sed -si 's/EXTERNAL /INTRINSIC/' SRC/dsecnd.f
+# Make sure these are compiled:
+%__cp -p INSTALL/dlamch.f SRC/
+%__cp -p INSTALL/slamch.f SRC/
+%__cp -p INSTALL/dsecnd_INT_ETIME.f SRC/dsecnd.f
+%__cp -p INSTALL/second_INT_ETIME.f SRC/second.f
 
 %build
 %make F77="%{f77}" \
@@ -110,35 +109,29 @@ sed -si 's/EXTERNAL /INTRINSIC/' SRC/dsecnd.f
       FFLAGS="%optflags -ffloat-store"
 
 %install
-rm -fr %{buildroot}
-install -d -m 755 %{buildroot}%{_bindir} \
+%__rm -fr %{buildroot}
+%__install -d -m 755 %{buildroot}%{_bindir} \
                   %{buildroot}%{_libdir} \
                   %{buildroot}%{_mandir}/man3
 
-install -m 755 equivalence %{buildroot}%{_bindir}/
-install -m 755 *.so.* %{buildroot}%{_libdir}
-install -m 644 *.a %{buildroot}%{_libdir}
+%__install -m 755 *.so.* %{buildroot}%{_libdir}
+%__install -m 644 *.a %{buildroot}%{_libdir}
 (cd %{buildroot}%{_libdir} && ln -s lib%{name}.so.%{major} lib%{name}.so)
 
-for file in man/manl/*; do
-    install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
+for file in manpages/man/manl/*; do
+    %__install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
 done
 
 %clean
-rm -fr %{buildroot}
+%__rm -fr %{buildroot}
 
 %post -n %{libname} -p /sbin/ldconfig
 
 %postun -n %{libname} -p /sbin/ldconfig
 
-%files
-%defattr(-,root,root)
-%doc README 
-%{_bindir}/*
-
 %files -n %{libname}
 %defattr(-,root,root)
-%doc README 
+%doc README COPYING
 %{_libdir}/liblapack.so.*
 
 %files -n %{develname}
