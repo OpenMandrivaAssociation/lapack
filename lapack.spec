@@ -30,7 +30,6 @@ BuildRequires:	gcc-g77
 BuildRequires:	gcc-gfortran
 %endif
 BuildRequires:	blas-devel >= 0:1.1
-BuildRoot: 	%{_tmppath}/%{name}-%{version}
 
 %description
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
