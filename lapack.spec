@@ -12,7 +12,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	3.1.1
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -23,6 +23,7 @@ Source3:	http://www.netlib.org/lapack/lapackqref.ps
 Source4:	http://www.netlib.org/blas/blasqr.ps
 Patch0:		lapack-3.1.1-make.inc.patch
 BuildRequires:	gcc-gfortran
+Obsoletes:	%{name} < 3.1.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
 %description
@@ -89,8 +90,8 @@ pages for blas are available in the blas-man package.
 Summary:	BLAS development libraries
 Group:		Sciences/Mathematics
 Requires:	%{libblasname} = %{version}-%{release}
-Provides:	blas = %{version}-%{release}
-Provides:	libblas = %{version}-%{release}
+Provides:	blas-devel = %{version}-%{release}
+Provides:	libblas-devel = %{version}-%{release}
 Obsoletes:	%{mklibname blas 1.1 -d} < 3.1.1
 Provides:	%{mklibname blas 1.1 -d}
 
