@@ -75,7 +75,7 @@ This package contains the headers and development libraries
 necessary to develop or compile applications using lapack.
 
 %package -n %{libblasname}
-Summary:	The BLAS (Basic Linear Algebra Subprograms) library.
+Summary:	The BLAS (Basic Linear Algebra Subprograms) library
 Group:		Sciences/Mathematics
 Obsoletes:	%{mklibname blas 1.1} < 3.1.1
 Provides:	%{mklibname blas 1.1}
@@ -87,7 +87,7 @@ pages for blas are available in the blas-man package.
 
 %package -n %{develblasname}
 Summary:	BLAS development libraries
-Group:		Development/Libraries
+Group:		Sciences/Mathematics
 Requires:	%{libblasname} = %{version}-%{release}
 Provides:	blas = %{version}-%{release}
 Provides:	libblas = %{version}-%{release}
