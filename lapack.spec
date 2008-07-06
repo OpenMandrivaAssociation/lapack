@@ -213,7 +213,6 @@ done
 %{_libdir}/liblapack*.a
 %{_mandir}/man3/*
 
-
 %files -n %{libblasname}
 %defattr(-,root,root)
 %doc blasqr.ps
