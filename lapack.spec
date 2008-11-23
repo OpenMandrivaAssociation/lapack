@@ -1,5 +1,5 @@
 #lapack
-%define major 3.1
+%define major 3.2
 %define libname %mklibname %{name} %{major}
 %define oldmajor 3.0
 %define oldlibname %mklibname %{name} %{oldmajor}
@@ -11,8 +11,8 @@
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
-Version:	3.1.1
-Release:	%mkrel 3
+Version:	3.2
+Release:	%mkrel 1
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -70,6 +70,7 @@ Provides:	%{name}-devel = %{version}-%{release}
 Provides:	lib%{name}-devel = %{version}-%{release}
 Obsoletes:	%mklibname -d %{name} %{oldmajor}
 Obsoletes:	%mklibname -d %{name} %{major}
+Requires:	blas-devel = %{version}-%{release}
 
 %description -n	%{develname}
 This package contains the headers and development libraries
@@ -94,6 +95,7 @@ Provides:	blas-devel = %{version}-%{release}
 Provides:	libblas-devel = %{version}-%{release}
 Obsoletes:	%{mklibname blas 1.1 -d} < 3.1.1
 Provides:	%{mklibname blas 1.1 -d}
+Requires:	gcc-gfortran
 
 %description -n %{develblasname}
 BLAS development libraries for applications that link statically.
@@ -119,10 +121,10 @@ cp libblas.a ${RPM_BUILD_DIR}/%{name}-%{version}/
 make clean
 FFLAGS="$FFLAGS -Os -fPIC" make dcabs1.o
 FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" make shared
-cp libblas.so.3.1.1 ${RPM_BUILD_DIR}/%{name}-%{version}/
+cp libblas.so.3.2 ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
-ln -s libblas.so.3.1.1 libblas.so
+ln -s libblas.so.3.2 libblas.so
 
 # Some files don't like -O2, but -Os is fine
 RPM_OPT_SIZE_FLAGS=$(echo $RPM_OPT_FLAGS | sed 's|-O2|-Os|')
@@ -148,7 +150,7 @@ popd
 pushd SRC
 make clean
 make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" shared
-cp liblapack.so.3.1.1 ${RPM_BUILD_DIR}/%{name}-%{version}/
+cp liblapack.so.3.2 ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
 # Buuld the static with pic dlamch, dsecnd, lsame, second, slamch bits
@@ -174,22 +176,22 @@ rm -fr %{buildroot}
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_mandir}/man3
 
-for f in liblapack.so.3.1.1 libblas.so.3.1.1 libblas.a liblapack.a liblapack_pic.a; do
+for f in liblapack.so.3.2 libblas.so.3.2 libblas.a liblapack.a liblapack_pic.a; do
   cp -f $f %{buildroot}%{_libdir}/$f
 done
 
 pushd %{buildroot}%{_libdir}
-ln -sf liblapack.so.3.1.1 liblapack.so
-ln -sf liblapack.so.3.1.1 liblapack.so.3
-ln -sf liblapack.so.3.1.1 liblapack.so.3.1
-ln -sf libblas.so.3.1.1 libblas.so
-ln -sf libblas.so.3.1.1 libblas.so.3
-ln -sf libblas.so.3.1.1 libblas.so.3.1
+ln -sf liblapack.so.3.2 liblapack.so
+ln -sf liblapack.so.3.2 liblapack.so.3
+#ln -sf liblapack.so.3.2 liblapack.so.3.2
+ln -sf libblas.so.3.2 libblas.so
+ln -sf libblas.so.3.2 libblas.so.3
+#ln -sf libblas.so.3.2 libblas.so.3.2
 popd
 
-for file in manpages/man/manl/*; do
-    install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
-done
+#for file in manpages/man/manl/*; do
+#    install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
+#done
 
 %clean
 %__rm -fr %{buildroot}
@@ -211,7 +213,7 @@ done
 %defattr(-,root,root)
 %{_libdir}/liblapack.so
 %{_libdir}/liblapack*.a
-%{_mandir}/man3/*
+#%{_mandir}/man3/*
 
 %files -n %{libblasname}
 %defattr(-,root,root)
