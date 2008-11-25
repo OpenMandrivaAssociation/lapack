@@ -1,8 +1,6 @@
 #lapack
-%define major 3.2
+%define major 3
 %define libname %mklibname %{name} %{major}
-%define oldmajor 3.0
-%define oldlibname %mklibname %{name} %{oldmajor}
 %define develname %mklibname -d %{name}
 
 # blas
@@ -12,7 +10,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	3.2
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -45,7 +43,8 @@ The lapack package provides the dynamic libraries for LAPACK/BLAS.
 Summary:	LAPACK libraries for linear algebra
 Group:		Sciences/Mathematics
 Provides:	lib%{name} = %{version}-%{release}
-Obsoletes:	%{oldlibname}
+Obsoletes:	%{_lib}lapack3.2
+Obsoletes:	%{_lib}lapack3.1
 
 %description -n %{libname}
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
@@ -79,8 +78,9 @@ necessary to develop or compile applications using lapack.
 %package -n %{libblasname}
 Summary:	The BLAS (Basic Linear Algebra Subprograms) library
 Group:		Sciences/Mathematics
-Obsoletes:	%{mklibname blas 1.1} < 3.1.1
-Provides:	%{mklibname blas 1.1}
+Obsoletes:	%{mklibname blas 1.1}
+Obsoletes:	%{_lib}blas3.2
+Obsoletes:	%{_lib}blas3.1
 
 %description -n %{libblasname}
 BLAS (Basic Linear Algebra Subprograms) is a standard library which
@@ -94,7 +94,6 @@ Requires:	%{libblasname} = %{version}-%{release}
 Provides:	blas-devel = %{version}-%{release}
 Provides:	libblas-devel = %{version}-%{release}
 Obsoletes:	%{mklibname blas 1.1 -d} < 3.1.1
-Provides:	%{mklibname blas 1.1 -d}
 Requires:	gcc-gfortran
 
 %description -n %{develblasname}
@@ -207,7 +206,7 @@ popd
 %files -n %{libname}
 %defattr(-,root,root)
 %doc README lapackqref.ps
-%{_libdir}/liblapack.so.*
+%{_libdir}/liblapack.so.%{major}*
 
 %files -n %{develname}
 %defattr(-,root,root)
@@ -218,7 +217,7 @@ popd
 %files -n %{libblasname}
 %defattr(-,root,root)
 %doc blasqr.ps
-%{_libdir}/libblas.so.*
+%{_libdir}/libblas.so.%{major}*
 
 %files -n %{develblasname}
 %defattr(-,root,root,-)
