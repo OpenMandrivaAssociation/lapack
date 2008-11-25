@@ -1,5 +1,6 @@
 #lapack
 %define major 3
+%define minor 2
 %define libname %mklibname %{name} %{major}
 %define develname %mklibname -d %{name}
 
@@ -9,8 +10,8 @@
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
-Version:	3.2
-Release:	%mkrel 2
+Version:	%{major}.%{minor}
+Release:	%mkrel 3
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -112,6 +113,10 @@ export FC=gfortran
 export CFLAGS="%{optflags} -funroll-all-loops -ffloat-store"
 export FFLAGS=$CFLAGS
 
+# take care of soname
+sed -i -e 's/LIBMAJOR/%{major}/g' Makefile.*
+sed -i -e 's/LIBSONAME/%{version}/g' Makefile.*
+
 # Build BLAS
 pushd BLAS/SRC
 FFLAGS="$FFLAGS" make dcabs1.o
@@ -120,10 +125,10 @@ cp libblas.a ${RPM_BUILD_DIR}/%{name}-%{version}/
 make clean
 FFLAGS="$FFLAGS -Os -fPIC" make dcabs1.o
 FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" make shared
-cp libblas.so.3.2 ${RPM_BUILD_DIR}/%{name}-%{version}/
+cp libblas.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
-ln -s libblas.so.3.2 libblas.so
+ln -s libblas.so.%{version} libblas.so
 
 # Some files don't like -O2, but -Os is fine
 RPM_OPT_SIZE_FLAGS=$(echo $RPM_OPT_FLAGS | sed 's|-O2|-Os|')
@@ -149,7 +154,7 @@ popd
 pushd SRC
 make clean
 make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" shared
-cp liblapack.so.3.2 ${RPM_BUILD_DIR}/%{name}-%{version}/
+cp liblapack.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
 # Buuld the static with pic dlamch, dsecnd, lsame, second, slamch bits
@@ -175,16 +180,16 @@ rm -fr %{buildroot}
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_mandir}/man3
 
-for f in liblapack.so.3.2 libblas.so.3.2 libblas.a liblapack.a liblapack_pic.a; do
+for f in liblapack.so.%{version} libblas.so.%{version} libblas.a liblapack.a liblapack_pic.a; do
   cp -f $f %{buildroot}%{_libdir}/$f
 done
 
 pushd %{buildroot}%{_libdir}
-ln -sf liblapack.so.3.2 liblapack.so
-ln -sf liblapack.so.3.2 liblapack.so.3
+ln -sf liblapack.so.%{version} liblapack.so
+ln -sf liblapack.so.%{version} liblapack.so.3
 #ln -sf liblapack.so.3.2 liblapack.so.3.2
-ln -sf libblas.so.3.2 libblas.so
-ln -sf libblas.so.3.2 libblas.so.3
+ln -sf libblas.so.%{version} libblas.so
+ln -sf libblas.so.%{version} libblas.so.3
 #ln -sf libblas.so.3.2 libblas.so.3.2
 popd
 
