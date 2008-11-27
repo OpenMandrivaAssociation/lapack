@@ -133,11 +133,11 @@ export FFLAGS=$CFLAGS
 # Build BLAS
 pushd BLAS/SRC
 %make FFLAGS="$FFLAGS" OPTS="$FFLAGS" dcabs1.o
-%make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" OPTS="$FFLAGS" static
+%make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" OPTS="$CFLAGS" static
 cp libblas.a ${RPM_BUILD_DIR}/%{name}-%{version}/
 %make clean
 %make FFLAGS="$FFLAGS -Os -fPIC" OPTS="$FFLAGS -Os -fPIC" dcabs1.o
-%make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" OPTS="$FFLAGS -fPIC" shared
+%make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" OPTS="$CFLAGS -fPIC" shared
 cp libblas.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
@@ -153,7 +153,7 @@ popd
 
 # Build the static lapack library
 pushd SRC
-%make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" OPTS="$CFLAGS" static
+%make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" NOOPT="$CFLAGS -Os" OPTS="$CFLAGS" static
 cp liblapack.a ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
@@ -166,7 +166,7 @@ popd
 # Build the shared lapack library
 pushd SRC
 %make clean
-%make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" OPTS="$FFLAGS -fPIC" shared
+%make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC" shared
 cp liblapack.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
@@ -179,7 +179,7 @@ popd
 # Build the static with pic lapack library
 pushd SRC
 %make clean
-%make FFLAGS="$CFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" OPTS="$FFLAGS -fPIC" static
+%make FFLAGS="$CFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC" static
 cp liblapack.a ${RPM_BUILD_DIR}/%{name}-%{version}/liblapack_pic.a
 popd
 
