@@ -1,4 +1,4 @@
-#lapack
+# lapack
 %define major 3
 %define minor 2
 %define libname %mklibname %{name} %{major}
@@ -11,15 +11,13 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 3
+Release:	%mkrel 4
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
 Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tar.bz2
-Source1:	Makefile.lapack
-Source2:	Makefile.blas
-Source3:	http://www.netlib.org/lapack/lapackqref.ps
-Source4:	http://www.netlib.org/blas/blasqr.ps
+Source1:	http://www.netlib.org/lapack/lapackqref.ps
+Source2:	http://www.netlib.org/blas/blasqr.ps
 Patch0:		lapack-3.1.1-make.inc.patch
 BuildRequires:	gcc-gfortran
 Obsoletes:	%{name} < 3.1.1
@@ -104,15 +102,28 @@ BLAS development libraries for applications that link statically.
 %setup -q
 %patch0 -p1
 
-# take care of soname
-cp -f %{SOURCE1} .
-cp -f %{SOURCE2} .
-sed -i -e 's/LIBMAJOR/%{major}/g' Makefile.*
-sed -i -e 's/LIBSONAME/%{version}/g' Makefile.*
-
 cp -f INSTALL/make.inc.gfortran make.inc
-cp -f Makefile.lapack SRC/Makefile
-cp -f Makefile.blas BLAS/SRC/Makefile
+
+# add Makefile entries for building static/shared libs
+cat >> SRC/Makefile <<EOF
+
+static: \$(ALLOBJ) \$(ALLXOBJ)
+	\$(ARCH) \$(ARCHFLAGS) liblapack.a \$(ALLOBJ) \$(ALLXOBJ)
+	\$(RANLIB) liblapack.a
+
+shared: \$(ALLOBJ) \$(ALLXOBJ)
+	cc \$(CFLAGS) -shared -Wl,-soname,liblapack.so.%{major} -o liblapack.so.%{version} \$(ALLOBJ) \$(ALLXOBJ) -L.. -lblas -lm -lgfortran -lc
+EOF
+
+cat >> BLAS/SRC/Makefile <<EOF
+
+static: \$(ALLOBJ)
+	\$(ARCH) \$(ARCHFLAGS) libblas.a \$(ALLOBJ)
+	\$(RANLIB) libblas.a
+
+shared: \$(ALLOBJ)
+	cc \$(CFLAGS) -shared -Wl,-soname,libblas.so.%{major} -o libblas.so.%{version} \$(ALLOBJ) -lm -lgfortran -lc
+EOF
 
 %build
 export FC=gfortran
@@ -172,12 +183,11 @@ pushd SRC
 cp liblapack.a ${RPM_BUILD_DIR}/%{name}-%{version}/liblapack_pic.a
 popd
 
-cp %{SOURCE3} lapackqref.ps
-cp %{SOURCE4} blasqr.ps
+cp %{SOURCE1} lapackqref.ps
+cp %{SOURCE2} blasqr.ps
 
 %install
 rm -fr %{buildroot}
-
 
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_mandir}/man3
