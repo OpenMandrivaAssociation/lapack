@@ -105,12 +105,14 @@ BLAS development libraries for applications that link statically.
 %patch0 -p1
 
 # take care of soname
-sed -i -e 's/LIBMAJOR/%{major}/g' %{SOURCE1} %{SOURCE2}
-sed -i -e 's/LIBSONAME/%{version}/g' %{SOURCE1} %{SOURCE2}
+cp -f %{SOURCE1} .
+cp -f %{SOURCE2} .
+sed -i -e 's/LIBMAJOR/%{major}/g' Makefile.*
+sed -i -e 's/LIBSONAME/%{version}/g' Makefile.*
 
 cp -f INSTALL/make.inc.gfortran make.inc
-cp -f %{SOURCE1} SRC/Makefile
-cp -f %{SOURCE2} BLAS/SRC/Makefile
+cp -f Makefile.lapack SRC/Makefile
+cp -f Makefile.blas BLAS/SRC/Makefile
 
 %build
 export FC=gfortran
