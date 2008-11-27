@@ -136,7 +136,7 @@ pushd BLAS/SRC
 %make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" OPTS="$FFLAGS" static
 cp libblas.a ${RPM_BUILD_DIR}/%{name}-%{version}/
 %make clean
-%make FFLAGS="$FFLAGS -Os -fPIC" OPTS="$FFLAGS" dcabs1.o
+%make FFLAGS="$FFLAGS -Os -fPIC" OPTS="$FFLAGS -Os -fPIC" dcabs1.o
 %make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" OPTS="$FFLAGS -fPIC" shared
 cp libblas.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
