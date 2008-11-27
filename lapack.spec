@@ -104,6 +104,10 @@ BLAS development libraries for applications that link statically.
 %setup -q
 %patch0 -p1
 
+# take care of soname
+sed -i -e 's/LIBMAJOR/%{major}/g' %{SOURCE1} %{SOURCE2}
+sed -i -e 's/LIBSONAME/%{version}/g' %{SOURCE1} %{SOURCE2}
+
 cp -f INSTALL/make.inc.gfortran make.inc
 cp -f %{SOURCE1} SRC/Makefile
 cp -f %{SOURCE2} BLAS/SRC/Makefile
@@ -113,18 +117,14 @@ export FC=gfortran
 export CFLAGS="%{optflags} -funroll-all-loops -ffloat-store"
 export FFLAGS=$CFLAGS
 
-# take care of soname
-sed -i -e 's/LIBMAJOR/%{major}/g' Makefile.*
-sed -i -e 's/LIBSONAME/%{version}/g' Makefile.*
-
 # Build BLAS
 pushd BLAS/SRC
-FFLAGS="$FFLAGS" make dcabs1.o
-FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" make static
+FFLAGS="$FFLAGS" %make dcabs1.o
+FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" %make static
 cp libblas.a ${RPM_BUILD_DIR}/%{name}-%{version}/
-make clean
-FFLAGS="$FFLAGS -Os -fPIC" make dcabs1.o
-FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" make shared
+%make clean
+FFLAGS="$FFLAGS -Os -fPIC" %make dcabs1.o
+FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" %make shared
 cp libblas.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
@@ -135,38 +135,38 @@ RPM_OPT_SIZE_FLAGS=$(echo $RPM_OPT_FLAGS | sed 's|-O2|-Os|')
 
 # Build the static dlamch, dsecnd, lsame, second, slamch bits
 pushd INSTALL
-make NOOPT="$CFLAGS -Os" OPTS="$CFLAGS"
+%make NOOPT="$CFLAGS -Os" OPTS="$CFLAGS"
 popd
 
 # Build the static lapack library
 pushd SRC
-make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" static
+%make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" static
 cp liblapack.a ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
 # Build the shared dlamch, dsecnd, lsame, second, slamch bits
 pushd INSTALL
-make clean
-make NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC"
+%make clean
+%make NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC"
 popd
 
 # Build the shared lapack library
 pushd SRC
-make clean
-make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" shared
+%make clean
+%make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" shared
 cp liblapack.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
 popd
 
 # Buuld the static with pic dlamch, dsecnd, lsame, second, slamch bits
 pushd INSTALL
-make clean
-make NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC"
+%make clean
+%make NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC"
 popd
 
 # Build the static with pic lapack library
 pushd SRC
-make clean
-make FFLAGS="$CFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" static
+%make clean
+%make FFLAGS="$CFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" static
 cp liblapack.a ${RPM_BUILD_DIR}/%{name}-%{version}/liblapack_pic.a
 popd
 
