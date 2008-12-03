@@ -11,7 +11,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 4
+Release:	%mkrel 5
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -77,6 +77,7 @@ necessary to develop or compile applications using lapack.
 %package -n %{libblasname}
 Summary:	The BLAS (Basic Linear Algebra Subprograms) library
 Group:		Sciences/Mathematics
+Provides:	libblas = %{version}-%{release}
 Obsoletes:	%{mklibname blas 1.1}
 Obsoletes:	%{_lib}blas3.2
 Obsoletes:	%{_lib}blas3.1
