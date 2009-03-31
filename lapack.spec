@@ -11,7 +11,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 5
+Release:	%mkrel 6
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -128,7 +128,7 @@ EOF
 
 %build
 export FC=gfortran
-export CFLAGS="%{optflags} -funroll-all-loops -ffloat-store"
+export CFLAGS="%{optflags} -funroll-all-loops"
 export FFLAGS=$CFLAGS
 
 # Build BLAS
