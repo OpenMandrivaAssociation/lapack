@@ -1,6 +1,6 @@
 # lapack
 %define major 3
-%define minor 2
+%define minor 2.1
 %define libname %mklibname %{name} %{major}
 %define develname %mklibname -d %{name}
 
@@ -11,11 +11,11 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 6
+Release:	%mkrel 1
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
-Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tar.bz2
+Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tgz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Patch0:		lapack-3.1.1-make.inc.patch
