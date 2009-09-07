@@ -3,21 +3,24 @@
 %define minor 2.1
 %define libname %mklibname %{name} %{major}
 %define develname %mklibname -d %{name}
+%define docname	%{name}-doc
 
 # blas
 %define libblasname %mklibname blas %{major}
 %define develblasname %mklibname blas -d
+%define docblasname blas-doc
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
 Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tgz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
+Source3:	http://www.netlib.org/lapack/manpages.tgz
 Patch0:		lapack-3.1.1-make.inc.patch
 BuildRequires:	gcc-gfortran
 Obsoletes:	%{name} < 3.1.1
@@ -74,6 +77,14 @@ Requires:	blas-devel = %{version}-%{release}
 This package contains the headers and development libraries
 necessary to develop or compile applications using lapack.
 
+%package -n %{docname}
+Summary:	Documentation for LAPACK
+Group:		Sciences/Mathematics
+BuildArch:	noarch
+
+%description -n %{docname}
+Man pages / documentation for LAPACK.
+
 %package -n %{libblasname}
 Summary:	The BLAS (Basic Linear Algebra Subprograms) library
 Group:		Sciences/Mathematics
@@ -99,9 +110,19 @@ Requires:	gcc-gfortran
 %description -n %{develblasname}
 BLAS development libraries for applications that link statically.
 
+%package -n %{docblasname}
+Summary:	Documentation for BLAS
+Group:		Sciences/Mathematics
+BuildArch:	noarch
+
+%description -n %{docblasname}
+Man pages / documentation for BLAS.
+
 %prep
 %setup -q
 %patch0 -p1
+
+tar zxf %SOURCE3
 
 cp -f INSTALL/make.inc.gfortran make.inc
 
@@ -206,9 +227,17 @@ ln -sf libblas.so.%{version} libblas.so.3
 #ln -sf libblas.so.3.2 libblas.so.3.2
 popd
 
-#for file in manpages/man/manl/*; do
-#    install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
-#done
+touch lapack-man-pages
+for file in lapack-3.2.0/manpages/man/manl/*; do
+    install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
+    echo %{_mandir}/man3/`basename $file .l`.3.lzma >> lapack-man-pages
+done
+touch blas-man-pages
+for file in lapack-3.2.0/manpages/blas/man/manl/*; do
+    install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
+    echo %{_mandir}/man3/`basename $file .l`.3.lzma >> blas-man-pages
+done
+
 
 %clean
 %__rm -fr %{buildroot}
@@ -223,21 +252,24 @@ popd
 
 %files -n %{libname}
 %defattr(-,root,root)
-%doc README lapackqref.ps
 %{_libdir}/liblapack.so.%{major}*
 
 %files -n %{develname}
 %defattr(-,root,root)
 %{_libdir}/liblapack.so
 %{_libdir}/liblapack*.a
-#%{_mandir}/man3/*
+
+%files -n %{docname} -f lapack-man-pages
+%doc README lapackqref.ps
 
 %files -n %{libblasname}
 %defattr(-,root,root)
-%doc blasqr.ps
 %{_libdir}/libblas.so.%{major}*
 
 %files -n %{develblasname}
 %defattr(-,root,root,-)
 %{_libdir}/libblas.so
 %{_libdir}/libblas*.a
+
+%files -n %{docblasname} -f blas-man-pages
+%doc blasqr.ps
