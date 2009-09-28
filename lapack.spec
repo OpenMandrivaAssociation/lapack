@@ -13,7 +13,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 3
+Release:	%mkrel 4
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -80,7 +80,6 @@ necessary to develop or compile applications using lapack.
 %package -n %{docname}
 Summary:	Documentation for LAPACK
 Group:		Sciences/Mathematics
-BuildArch:	noarch
 
 %description -n %{docname}
 Man pages / documentation for LAPACK.
@@ -113,7 +112,6 @@ BLAS development libraries for applications that link statically.
 %package -n %{docblasname}
 Summary:	Documentation for BLAS
 Group:		Sciences/Mathematics
-BuildArch:	noarch
 
 %description -n %{docblasname}
 Man pages / documentation for BLAS.
