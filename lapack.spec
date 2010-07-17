@@ -1,6 +1,6 @@
 # lapack
 %define major 3
-%define minor 2.1
+%define minor 2.2
 %define libname %mklibname %{name} %{major}
 %define develname %mklibname -d %{name}
 %define docname	%{name}-doc
@@ -13,7 +13,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 5
+Release:	%mkrel 1
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
