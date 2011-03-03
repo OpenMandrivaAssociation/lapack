@@ -228,12 +228,12 @@ popd
 touch lapack-man-pages
 for file in lapack-3.2.0/manpages/man/manl/*; do
     install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
-    echo %{_mandir}/man3/`basename $file .l`.3.lzma >> lapack-man-pages
+    echo %{_mandir}/man3/`basename $file .l`.3.xz >> lapack-man-pages
 done
 touch blas-man-pages
 for file in lapack-3.2.0/manpages/blas/man/manl/*; do
     install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
-    echo %{_mandir}/man3/`basename $file .l`.3.lzma >> blas-man-pages
+    echo %{_mandir}/man3/`basename $file .l`.3.xz >> blas-man-pages
 done
 
 %clean
