@@ -1,6 +1,6 @@
 # lapack
 %define major 3
-%define minor 2.2
+%define minor 3.0
 %define libname %mklibname %{name} %{major}
 %define develname %mklibname -d %{name}
 %define docname	%{name}-doc
@@ -22,6 +22,7 @@ Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
 Patch0:		lapack-3.1.1-make.inc.patch
+Patch1:		lapack-3.3.0-Makefile.patch
 BuildRequires:	gcc-gfortran
 Obsoletes:	%{name} < 3.1.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
@@ -119,6 +120,7 @@ Man pages / documentation for BLAS.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p0
 
 tar zxf %SOURCE3
 
@@ -219,10 +221,8 @@ done
 pushd %{buildroot}%{_libdir}
 ln -sf liblapack.so.%{version} liblapack.so
 ln -sf liblapack.so.%{version} liblapack.so.3
-#ln -sf liblapack.so.3.2 liblapack.so.3.2
 ln -sf libblas.so.%{version} libblas.so
 ln -sf libblas.so.%{version} libblas.so.3
-#ln -sf libblas.so.3.2 libblas.so.3.2
 popd
 
 touch lapack-man-pages
@@ -235,7 +235,6 @@ for file in lapack-3.2.0/manpages/blas/man/manl/*; do
     install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
     echo %{_mandir}/man3/`basename $file .l`.3.lzma >> blas-man-pages
 done
-
 
 %clean
 %__rm -fr %{buildroot}
