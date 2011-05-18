@@ -21,8 +21,6 @@ Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tgz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
-Patch0:		lapack-3.1.1-make.inc.patch
-Patch1:		lapack-3.3.0-Makefile.patch
 Patch2:		lapack-3.3.1-cmake-sover.patch
 Patch3:		lapack-3.3.1-lib64.patch
 BuildRequires:	gcc-gfortran
