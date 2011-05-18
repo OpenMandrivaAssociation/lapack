@@ -25,6 +25,7 @@ Patch0:		lapack-3.1.1-make.inc.patch
 Patch1:		lapack-3.3.0-Makefile.patch
 Patch2:		lapack-3.3.1-cmake-sover.patch
 BuildRequires:	gcc-gfortran
+BuildRequires:	cmake
 Obsoletes:	%{name} < 3.1.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
