@@ -24,6 +24,7 @@ Source3:	http://www.netlib.org/lapack/manpages.tgz
 Patch0:		lapack-3.1.1-make.inc.patch
 Patch1:		lapack-3.3.0-Makefile.patch
 Patch2:		lapack-3.3.1-cmake-sover.patch
+Patch3:		lapack-3.3.1-lib64.patch
 BuildRequires:	gcc-gfortran
 BuildRequires:	cmake
 Obsoletes:	%{name} < 3.1.1
@@ -122,111 +123,26 @@ Man pages / documentation for BLAS.
 %prep
 %setup -q -a3
 %patch2 -p1 -b .sover
-
-%if 0
-%patch0 -p1
-%patch1 -p0
-
-tar zxf %SOURCE3
-
-cp -f INSTALL/make.inc.gfortran make.inc
-
-# add Makefile entries for building static/shared libs
-cat >> SRC/Makefile <<EOF
-
-static: \$(ALLOBJ) \$(ALLXOBJ)
-	\$(ARCH) \$(ARCHFLAGS) liblapack.a \$(ALLOBJ) \$(ALLXOBJ)
-	\$(RANLIB) liblapack.a
-
-shared: \$(ALLOBJ) \$(ALLXOBJ)
-	cc \$(CFLAGS) -shared -Wl,-soname,liblapack.so.%{major} -o liblapack.so.%{version} \$(ALLOBJ) \$(ALLXOBJ) -L.. -lblas -lm -lgfortran -lc
-EOF
-
-cat >> BLAS/SRC/Makefile <<EOF
-
-static: \$(ALLOBJ)
-	\$(ARCH) \$(ARCHFLAGS) libblas.a \$(ALLOBJ)
-	\$(RANLIB) libblas.a
-
-shared: \$(ALLOBJ)
-	cc \$(CFLAGS) -shared -Wl,-soname,libblas.so.%{major} -o libblas.so.%{version} \$(ALLOBJ) -lm -lgfortran -lc
-EOF
-%endif
-
-%build
-%cmake -DBUILD_STATIC_LIBS=ON -DBUILD_TESTING=OFF
-%make
-cd..
-
-%cmake -DBUILD_STATIC_LIBS=ON %cmake -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
-%make
-
-%if 0
-export FC=gfortran
-export CFLAGS="%{optflags} -funroll-all-loops"
-export FFLAGS=$CFLAGS
-
-# Build BLAS
-pushd BLAS/SRC
-%make FFLAGS="$FFLAGS" OPTS="$FFLAGS" dcabs1.o
-%make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" OPTS="$CFLAGS" static
-cp libblas.a ${RPM_BUILD_DIR}/%{name}-%{version}/
-%make clean
-%make FFLAGS="$FFLAGS -Os -fPIC" OPTS="$FFLAGS -Os -fPIC" dcabs1.o
-%make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" OPTS="$CFLAGS -fPIC" shared
-cp libblas.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
-popd
-
-ln -s libblas.so.%{version} libblas.so
-
-# Some files don't like -O2, but -Os is fine
-RPM_OPT_SIZE_FLAGS=$(echo $RPM_OPT_FLAGS | sed 's|-O2|-Os|')
-
-# Build the static dlamch, dsecnd, lsame, second, slamch bits
-pushd INSTALL
-%make NOOPT="$CFLAGS -Os" OPTS="$CFLAGS"
-popd
-
-# Build the static lapack library
-pushd SRC
-%make FFLAGS="$FFLAGS" CFLAGS="$CFLAGS" NOOPT="$CFLAGS -Os" OPTS="$CFLAGS" static
-cp liblapack.a ${RPM_BUILD_DIR}/%{name}-%{version}/
-popd
-
-# Build the shared dlamch, dsecnd, lsame, second, slamch bits
-pushd INSTALL
-%make clean
-%make NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC"
-popd
-
-# Build the shared lapack library
-pushd SRC
-%make clean
-%make FFLAGS="$FFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC" shared
-cp liblapack.so.%{version} ${RPM_BUILD_DIR}/%{name}-%{version}/
-popd
-
-# Buuld the static with pic dlamch, dsecnd, lsame, second, slamch bits
-pushd INSTALL
-%make clean
-%make NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC"
-popd
-
-# Build the static with pic lapack library
-pushd SRC
-%make clean
-%make FFLAGS="$CFLAGS -fPIC" CFLAGS="$CFLAGS -fPIC" NOOPT="$CFLAGS -Os -fPIC" OPTS="$CFLAGS -fPIC" static
-cp liblapack.a ${RPM_BUILD_DIR}/%{name}-%{version}/liblapack_pic.a
-popd
-
-%endif
+%patch3 -p0 -b .lib64
 
 cp %{SOURCE1} lapackqref.ps
 cp %{SOURCE2} blasqr.ps
 
+rm -f manpages/blas/man/manl/{csrot.l,lsame.l,xerbla.l,xerbla_array.l,zdrot.l}
+
+%build
+%cmake -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
+%make
+cd ..
+
+%cmake -DBUILD_STATIC_LIBS=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF
+%make
+
 %install
 rm -fr %{buildroot}
 %makeinstall_std -C build
+
+install -m0644 build/lib/*.a %{buildroot}%{_libdir}/
 
 mkdir -p %{buildroot}%{_mandir}/man3
 touch lapack-man-pages
@@ -259,6 +175,8 @@ done
 %defattr(-,root,root)
 %{_libdir}/liblapack.so
 %{_libdir}/liblapack*.a
+%{_libdir}/pkgconfig/lapack.pc
+%{_libdir}/cmake/lapack-%{version}/lapack-*.cmake
 
 %files -n %{docname} -f lapack-man-pages
 %doc README lapackqref.ps
@@ -271,6 +189,7 @@ done
 %defattr(-,root,root,-)
 %{_libdir}/libblas.so
 %{_libdir}/libblas*.a
+%{_libdir}/pkgconfig/blas.pc
 
 %files -n %{docblasname} -f blas-man-pages
 %doc blasqr.ps
