@@ -1,6 +1,6 @@
 # lapack
 %define major 3
-%define minor 3.0
+%define minor 3.1
 %define libname %mklibname %{name} %{major}
 %define develname %mklibname -d %{name}
 %define docname	%{name}-doc
@@ -13,7 +13,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 2
+Release:	%mkrel 1
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -23,6 +23,7 @@ Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
 Patch0:		lapack-3.1.1-make.inc.patch
 Patch1:		lapack-3.3.0-Makefile.patch
+Patch2:		lapack-3.3.1-cmake-sover.patch
 BuildRequires:	gcc-gfortran
 Obsoletes:	%{name} < 3.1.1
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
@@ -118,7 +119,10 @@ Group:		Sciences/Mathematics
 Man pages / documentation for BLAS.
 
 %prep
-%setup -q
+%setup -q -a3
+%patch2 -p1 -b .sover
+
+%if 0
 %patch0 -p1
 %patch1 -p0
 
@@ -146,8 +150,17 @@ static: \$(ALLOBJ)
 shared: \$(ALLOBJ)
 	cc \$(CFLAGS) -shared -Wl,-soname,libblas.so.%{major} -o libblas.so.%{version} \$(ALLOBJ) -lm -lgfortran -lc
 EOF
+%endif
 
 %build
+%cmake -DBUILD_STATIC_LIBS=ON -DBUILD_TESTING=OFF
+%make
+cd..
+
+%cmake -DBUILD_STATIC_LIBS=ON %cmake -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
+%make
+
+%if 0
 export FC=gfortran
 export CFLAGS="%{optflags} -funroll-all-loops"
 export FFLAGS=$CFLAGS
@@ -205,35 +218,25 @@ pushd SRC
 cp liblapack.a ${RPM_BUILD_DIR}/%{name}-%{version}/liblapack_pic.a
 popd
 
+%endif
+
 cp %{SOURCE1} lapackqref.ps
 cp %{SOURCE2} blasqr.ps
 
 %install
 rm -fr %{buildroot}
+%makeinstall_std -C build
 
-mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_mandir}/man3
-
-for f in liblapack.so.%{version} libblas.so.%{version} libblas.a liblapack.a liblapack_pic.a; do
-  cp -f $f %{buildroot}%{_libdir}/$f
-done
-
-pushd %{buildroot}%{_libdir}
-ln -sf liblapack.so.%{version} liblapack.so
-ln -sf liblapack.so.%{version} liblapack.so.3
-ln -sf libblas.so.%{version} libblas.so
-ln -sf libblas.so.%{version} libblas.so.3
-popd
-
 touch lapack-man-pages
-for file in lapack-3.2.0/manpages/man/manl/*; do
+for file in manpages/man/manl/*; do
     install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
-    echo %{_mandir}/man3/`basename $file .l`.3.xz >> lapack-man-pages
+    echo %{_mandir}/man3/`basename $file .l`.3%{_extension} >> lapack-man-pages
 done
 touch blas-man-pages
-for file in lapack-3.2.0/manpages/blas/man/manl/*; do
+for file in manpages/blas/man/manl/*; do
     install -m 644 $file %{buildroot}%{_mandir}/man3/`basename $file .l`.3
-    echo %{_mandir}/man3/`basename $file .l`.3.xz >> blas-man-pages
+    echo %{_mandir}/man3/`basename $file .l`.3%{_extension} >> blas-man-pages
 done
 
 %clean
