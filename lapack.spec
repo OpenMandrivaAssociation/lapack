@@ -13,7 +13,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	%{major}.%{minor}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	BSD-like
 Group:		Sciences/Mathematics
 URL:		http://www.netlib.org/lapack/
@@ -129,6 +129,8 @@ cp %{SOURCE2} blasqr.ps
 rm -f manpages/blas/man/manl/{csrot.l,lsame.l,xerbla.l,xerbla_array.l,zdrot.l}
 
 %build
+export CFLAGS="%{optflags} -fPIC"
+export FFLAGS="%{optflags} -fPIC"
 %cmake -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
 %make
 cd ..
