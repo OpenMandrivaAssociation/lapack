@@ -1,6 +1,6 @@
 # lapack
 %define	major	3
-%define	minor	3.1
+%define	minor	4.2
 %define	libname	%mklibname %{name} %{major}
 %define	devname	%mklibname -d %{name}
 %define	docname	%{name}-doc
@@ -21,8 +21,8 @@ Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tgz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
-Patch2:		lapack-3.3.1-cmake-sover.patch
-Patch3:		lapack-3.3.1-lib64.patch
+Patch2:		lapack-3.4.2-cmake-sover.patch
+Patch3:		lapack-3.4.2-lib64.patch
 BuildRequires:	gcc-gfortran
 BuildRequires:	cmake
 Obsoletes:	%{name} < 3.1.1
@@ -120,7 +120,7 @@ Man pages / documentation for BLAS.
 %prep
 %setup -q -a3
 %patch2 -p1 -b .sover~
-%patch3 -p0 -b .lib64~
+%patch3 -p1 -b .lib64~
 
 cp %{SOURCE1} lapackqref.ps
 cp %{SOURCE2} blasqr.ps
