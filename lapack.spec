@@ -70,7 +70,6 @@ Group:		Sciences/Mathematics
 Requires:	%{libname} = %{version}-%{release}
 Provides:	%{name}-devel = %{version}-%{release}
 Provides:	lib%{name}-devel = %{version}-%{release}
-Obsoletes:	%mklibname -d %{name} %{oldmajor}
 Obsoletes:	%mklibname -d %{name} %{major}
 Requires:	blas-devel = %{version}-%{release}
 
