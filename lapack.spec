@@ -1,14 +1,14 @@
 # lapack
-%define major 3
-%define minor 3.1
-%define libname %mklibname %{name} %{major}
-%define develname %mklibname -d %{name}
-%define docname	%{name}-doc
+%define	major	3
+%define	minor	3.1
+%define	libname	%mklibname %{name} %{major}
+%define	devname	%mklibname -d %{name}
+%define	docname	%{name}-doc
 
 # blas
-%define libblasname %mklibname blas %{major}
-%define develblasname %mklibname blas -d
-%define docblasname blas-doc
+%define	libblasname %mklibname blas %{major}
+%define	develblasname %mklibname blas -d
+%define	docblasname blas-doc
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
@@ -26,7 +26,6 @@ Patch3:		lapack-3.3.1-lib64.patch
 BuildRequires:	gcc-gfortran
 BuildRequires:	cmake
 Obsoletes:	%{name} < 3.1.1
-BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
 %description
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
@@ -43,14 +42,14 @@ is coded in Fortran77 and built with gcc.
 
 The lapack package provides the dynamic libraries for LAPACK/BLAS.
 
-%package -n %{libname}
+%package -n	%{libname}
 Summary:	LAPACK libraries for linear algebra
 Group:		Sciences/Mathematics
 Provides:	lib%{name} = %{version}-%{release}
 Obsoletes:	%{_lib}lapack3.2
 Obsoletes:	%{_lib}lapack3.1
 
-%description -n %{libname}
+%description -n	%{libname}
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
 linear algebra. LAPACK provides routines for solving systems of
 simultaneous linear equations, least-squares solutions of linear
@@ -65,7 +64,7 @@ is coded in Fortran77 and built with gcc.
 
 The lapack package provides the dynamic libraries for LAPACK/BLAS.
 
-%package -n %{develname}
+%package -n	%{devname}
 Summary:	LAPACK static library
 Group:		Sciences/Mathematics
 Requires:	%{libname} = %{version}-%{release}
@@ -75,18 +74,18 @@ Obsoletes:	%mklibname -d %{name} %{oldmajor}
 Obsoletes:	%mklibname -d %{name} %{major}
 Requires:	blas-devel = %{version}-%{release}
 
-%description -n	%{develname}
+%description -n	%{devname}
 This package contains the headers and development libraries
 necessary to develop or compile applications using lapack.
 
-%package -n %{docname}
+%package -n	%{docname}
 Summary:	Documentation for LAPACK
 Group:		Sciences/Mathematics
 
 %description -n %{docname}
 Man pages / documentation for LAPACK.
 
-%package -n %{libblasname}
+%package -n	%{libblasname}
 Summary:	The BLAS (Basic Linear Algebra Subprograms) library
 Group:		Sciences/Mathematics
 Provides:	libblas = %{version}-%{release}
@@ -94,12 +93,12 @@ Obsoletes:	%{mklibname blas 1.1}
 Obsoletes:	%{_lib}blas3.2
 Obsoletes:	%{_lib}blas3.1
 
-%description -n %{libblasname}
+%description -n	%{libblasname}
 BLAS (Basic Linear Algebra Subprograms) is a standard library which
 provides a number of basic algorithms for numerical algebra. Man
 pages for blas are available in the blas-man package.
 
-%package -n %{develblasname}
+%package -n	%{develblasname}
 Summary:	BLAS development libraries
 Group:		Sciences/Mathematics
 Requires:	%{libblasname} = %{version}-%{release}
@@ -108,20 +107,20 @@ Provides:	libblas-devel = %{version}-%{release}
 Obsoletes:	%{mklibname blas 1.1 -d} < 3.1.1
 Requires:	gcc-gfortran
 
-%description -n %{develblasname}
+%description -n	%{develblasname}
 BLAS development libraries for applications that link statically.
 
-%package -n %{docblasname}
+%package -n	%{docblasname}
 Summary:	Documentation for BLAS
 Group:		Sciences/Mathematics
 
-%description -n %{docblasname}
+%description -n	%{docblasname}
 Man pages / documentation for BLAS.
 
 %prep
 %setup -q -a3
-%patch2 -p1 -b .sover
-%patch3 -p0 -b .lib64
+%patch2 -p1 -b .sover~
+%patch3 -p0 -b .lib64~
 
 cp %{SOURCE1} lapackqref.ps
 cp %{SOURCE2} blasqr.ps
@@ -137,7 +136,6 @@ cd ..
 %make
 
 %install
-rm -fr %{buildroot}
 %makeinstall_std -C build
 
 install -m0644 build/lib/*.a %{buildroot}%{_libdir}/
@@ -154,23 +152,10 @@ for file in manpages/blas/man/manl/*; do
     echo %{_mandir}/man3/`basename $file .l`.3%{_extension} >> blas-man-pages
 done
 
-%clean
-%__rm -fr %{buildroot}
-
-%if %mdkversion < 200900
-%post -n %{libname} -p /sbin/ldconfig
-%endif
-
-%if %mdkversion < 200900
-%postun -n %{libname} -p /sbin/ldconfig
-%endif
-
 %files -n %{libname}
-%defattr(-,root,root)
 %{_libdir}/liblapack.so.%{major}*
 
-%files -n %{develname}
-%defattr(-,root,root)
+%files -n %{devname}
 %{_libdir}/liblapack.so
 %{_libdir}/liblapack*.a
 %{_libdir}/pkgconfig/lapack.pc
@@ -180,11 +165,9 @@ done
 %doc README lapackqref.ps
 
 %files -n %{libblasname}
-%defattr(-,root,root)
 %{_libdir}/libblas.so.%{major}*
 
 %files -n %{develblasname}
-%defattr(-,root,root,-)
 %{_libdir}/libblas.so
 %{_libdir}/libblas*.a
 %{_libdir}/pkgconfig/blas.pc
