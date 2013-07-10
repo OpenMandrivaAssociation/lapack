@@ -12,7 +12,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	3.4.2
-Release:	1
+Release:	2
 License:	BSD-like
 Group:		Sciences/Mathematics
 Url:		http://www.netlib.org/lapack/
@@ -134,7 +134,7 @@ cd ..
 %install
 %makeinstall_std -C build
 
-#install -m0644 build/lib/*.a %{buildroot}%{_libdir}/
+install -m0644 build/lib/*.a %{buildroot}%{_libdir}/
 
 mkdir -p %{buildroot}%{_mandir}/man3
 touch lapack-man-pages
@@ -153,6 +153,7 @@ done
 
 %files -n %{devname}
 %{_libdir}/liblapack.so
+%{_libdir}/liblapack.a
 %{_libdir}/pkgconfig/lapack.pc
 %{_libdir}/cmake/lapack-%{version}/lapack-*.cmake
 
@@ -164,6 +165,7 @@ done
 
 %files -n %{devblas}
 %{_libdir}/libblas.so
+%{_libdir}/libblas.a
 %{_libdir}/pkgconfig/blas.pc
 
 %files -n %{docblas} -f blas-man-pages
