@@ -12,7 +12,7 @@
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	3.4.2
-Release:	6
+Release:	7
 License:	BSD-like
 Group:		Sciences/Mathematics
 Url:		http://www.netlib.org/lapack/
