@@ -14,7 +14,7 @@
 @@ -1,5 +1,7 @@
  cmake_minimum_required(VERSION 2.8)
  project(LAPACK Fortran)
-+set(LAPACK_VERSION 3.4.2)
++set(LAPACK_VERSION 3.5.0)
 +set(CPACK_PACKAGE_VERSION_MAJOR 3)
  
  # Configure the warning and code coverage suppression file
