@@ -11,7 +11,7 @@
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
-Version:	3.5.0
+Version:	3.6.0
 Release:	1
 License:	BSD-like
 Group:		Sciences/Mathematics
@@ -20,8 +20,7 @@ Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tgz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
-Patch2:		lapack-3.4.2-cmake-sover.patch
-Patch3:		lapack-3.4.2-lib64.patch
+Patch0:		lapack-3.6.0-make.inc.patch
 
 BuildRequires:	cmake
 BuildRequires:	gcc-gfortran

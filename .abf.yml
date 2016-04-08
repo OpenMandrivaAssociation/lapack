@@ -1,7 +1,5 @@
-removed_sources:
-  lapack-3.4.2.tgz: 93a6e4e6639aaf00571d53a580ddc415416e868b
 sources:
   blasqr.ps: 01bf77cd3374a4ce5686c0e38556b6620e018987
-  lapack-3.5.0.tgz: 5870081889bf5d15fd977993daab29cf3c5ea970
   lapackqref.ps: d552e8d06b18df797f7b8bb14c346eb6303ae9f5
   manpages.tgz: 94ff7b035389de0a052fd53c3b045dc46ee23cef
+  lapack-3.6.0.tgz: 7e993de16d80d52b22b6093465eeb90c93c7a2e7
