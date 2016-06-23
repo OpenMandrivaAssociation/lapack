@@ -172,12 +172,11 @@ zscal.f.3 zscal.3 zswap.f.3 zswap.3 zsymm.f.3 zsymm.3 zsyr2k.f.3 zsyr2k.3 zsyrk.
 ztbmv.f.3 ztbmv.3 ztbsv.f.3 ztbsv.3 ztpmv.f.3 ztpmv.3 ztpsv.f.3 ztpsv.3 ztrmm.f.3 ztrmm.3 \
 ztrmv.f.3 ztrmv.3 ztrsm.f.3 ztrsm.3 ztrsv.f.3 ztrsv.3 ../../blas/man/man3
 cd ../..
-popd
 
 find blas/man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > blas-man-pages
 
 # remove weird man pages
-pushd manpages/man/man3
+pushd man/man3
 rm -rf _Users_julie*
 popd
 
