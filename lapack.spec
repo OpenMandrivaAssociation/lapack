@@ -138,7 +138,6 @@ install -m0644 build/lib/*.a %{buildroot}%{_libdir}/
 mkdir -p %{buildroot}%{_mandir}/man3
 
 # Blas manpages
-pushd manpages/
 mkdir -p blas/man/man3
 cd man/man3/
 mv caxpy.f.3 caxpy.3 ccopy.f.3 ccopy.3 cdotc.f.3 cdotc.3 cdotu.f.3 cdotu.3 cgbmv.f.3 cgbmv.3 \
@@ -175,17 +174,17 @@ ztrmv.f.3 ztrmv.3 ztrsm.f.3 ztrsm.3 ztrsv.f.3 ztrsv.3 ../../blas/man/man3
 cd ../..
 popd
 
-find manpages/blas/man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > blas-man-pages
+find blas/man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > blas-man-pages
 
 # remove weird man pages
 pushd manpages/man/man3
 rm -rf _Users_julie*
 popd
 
-find manpages/man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > lapack-man-pages
+find man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > lapack-man-pages
 
-cp -f manpages/blas/man/man3/* %{buildroot}%{_mandir}/man3
-cp -f manpages/man/man3/* %{buildroot}%{_mandir}/man3
+cp -f blas/man/man3/* %{buildroot}%{_mandir}/man3
+cp -f man/man3/* %{buildroot}%{_mandir}/man3
 
 %files -n %{libname}
 %{_libdir}/liblapack.so.%{major}*
