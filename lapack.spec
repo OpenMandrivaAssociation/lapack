@@ -11,7 +11,7 @@
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
-Version:	3.6.0
+Version:	3.6.1
 Release:	1
 License:	BSD-like
 Group:		Sciences/Mathematics
@@ -169,4 +169,3 @@ done
 
 %files -n %{docblas} -f blas-man-pages
 %doc blasqr.ps
-
