@@ -1,3 +1,5 @@
+%define debug_package %{nil}
+
 # lapack
 %define	major	3
 %define	libname	%mklibname %{name} %{major}
@@ -11,7 +13,7 @@
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
-Version:	3.6.1
+Version:	3.7.1
 Release:	1
 License:	BSD-like
 Group:		Sciences/Mathematics
@@ -20,7 +22,7 @@ Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tgz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
-Patch0:		lapack-3.6.0-make.inc.patch
+#Patch0:		lapack-3.6.0-make.inc.patch
 
 BuildRequires:	cmake
 BuildRequires:	gcc-gfortran
@@ -195,7 +197,7 @@ cp -f man/man3/* %{buildroot}%{_mandir}/man3
 %{_libdir}/cmake/lapack-%{version}/lapack-*.cmake
 
 %files -n %{docname} -f lapack-man-pages
-%doc README lapackqref.ps
+%doc lapackqref.ps
 
 %files -n %{libblas}
 %{_libdir}/libblas.so.%{major}*
