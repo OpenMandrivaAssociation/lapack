@@ -2,4 +2,4 @@ sources:
   blasqr.ps: 01bf77cd3374a4ce5686c0e38556b6620e018987
   lapackqref.ps: d552e8d06b18df797f7b8bb14c346eb6303ae9f5
   manpages.tgz: e342ffc0e06f549c34032fbe40c8dc49136b57ce
-  lapack-3.6.1.tgz: 7220a9bc9c766cb513007f313b804d88f110c228
+  lapack-3.7.1.tgz: 84c4f7163b52b1bf1f6ca2193f6f48ed3dec0fab
