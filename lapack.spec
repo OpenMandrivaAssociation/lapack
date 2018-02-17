@@ -13,12 +13,12 @@
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
-Version:	3.7.1
+Version:	3.8.0
 Release:	1
 License:	BSD-like
 Group:		Sciences/Mathematics
 Url:		http://www.netlib.org/lapack/
-Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tgz
+Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tar.gz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz

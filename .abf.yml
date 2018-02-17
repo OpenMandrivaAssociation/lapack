@@ -1,5 +1,7 @@
+removed_sources:
+  lapack-3.7.1.tgz: 84c4f7163b52b1bf1f6ca2193f6f48ed3dec0fab
 sources:
   blasqr.ps: 01bf77cd3374a4ce5686c0e38556b6620e018987
+  lapack-3.8.0.tar.gz: 55ac9d6be510883c5442c8aca967722cdf58fb29
   lapackqref.ps: d552e8d06b18df797f7b8bb14c346eb6303ae9f5
-  manpages.tgz: e342ffc0e06f549c34032fbe40c8dc49136b57ce
-  lapack-3.7.1.tgz: 84c4f7163b52b1bf1f6ca2193f6f48ed3dec0fab
+  manpages.tgz: eb9ce19ce73e645bfb22af5480f16190baf09ae3
