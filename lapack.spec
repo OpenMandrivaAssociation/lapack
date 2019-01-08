@@ -11,10 +11,12 @@
 %define	devblas %mklibname blas -d
 %define	docblas blas-doc
 
+%global optflags %{optflags} -O3
+
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	3.8.0
-Release:	4
+Release:	5
 License:	BSD-like
 Group:		Sciences/Mathematics
 Url:		http://www.netlib.org/lapack/
