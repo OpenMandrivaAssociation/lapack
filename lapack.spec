@@ -109,7 +109,7 @@ Man pages / documentation for BLAS.
 
 %prep
 %setup -q -a3
-%apply_patches
+%autopatch -p1
 
 cp %{SOURCE1} lapackqref.ps
 cp %{SOURCE2} blasqr.ps
