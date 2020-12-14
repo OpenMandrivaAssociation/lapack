@@ -182,7 +182,7 @@ find blas/man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > blas-man-pages
 # remove weird man pages
 cd man/man3
 rm -rf _Users_julie*
-cd ..
+cd -
 
 find man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > lapack-man-pages
 
