@@ -1,22 +1,22 @@
 %define debug_package %{nil}
 
 # lapack
-%define	major	3
-%define	libname	%mklibname %{name} %{major}
-%define	devname	%mklibname -d %{name}
-%define	docname	%{name}-doc
+%define major 3
+%define libname %mklibname %{name} %{major}
+%define devname %mklibname -d %{name}
+%define docname %{name}-doc
 
 # blas
-%define	libblas %mklibname blas %{major}
-%define	devblas %mklibname blas -d
-%define	docblas blas-doc
+%define libblas %mklibname blas %{major}
+%define devblas %mklibname blas -d
+%define docblas blas-doc
 
 %global optflags %{optflags} -O3
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	3.9.0
-Release:	5
+Release:	6
 License:	BSD-like
 Group:		Sciences/Mathematics
 Url:		http://www.netlib.org/lapack/
@@ -24,7 +24,8 @@ Source0:	https://github.com/Reference-LAPACK/lapack/archive/v%{version}.tar.gz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
-
+Patch0:		https://src.fedoraproject.org/rpms/lapack/raw/master/f/lapack-3.9.0-make.inc.patch
+Patch1:		https://github.com/Reference-LAPACK/lapack/commit/87536aa3c8bb0af00f66088fb6ac05d87509e011.patch
 BuildRequires:	cmake
 BuildRequires:	gcc-gfortran
 
@@ -43,12 +44,12 @@ is coded in Fortran77 and built with gcc.
 
 The lapack package provides the dynamic libraries for LAPACK/BLAS.
 
-%package -n	%{libname}
+%package -n %{libname}
 Summary:	LAPACK libraries for linear algebra
 Group:		Sciences/Mathematics
 Provides:	lib%{name} = %{version}-%{release}
 
-%description -n	%{libname}
+%description -n %{libname}
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
 linear algebra. LAPACK provides routines for solving systems of
 simultaneous linear equations, least-squares solutions of linear
@@ -63,17 +64,17 @@ is coded in Fortran77 and built with gcc.
 
 The lapack package provides the dynamic libraries for LAPACK/BLAS.
 
-%package -n	%{devname}
+%package -n %{devname}
 Summary:	LAPACK static library
 Group:		Sciences/Mathematics
 Requires:	%{libname} = %{version}-%{release}
 Provides:	%{name}-devel = %{version}-%{release}
 
-%description -n	%{devname}
+%description -n %{devname}
 This package contains the headers and development libraries
 necessary to develop or compile applications using lapack.
 
-%package -n	%{docname}
+%package -n %{docname}
 Summary:	Documentation for LAPACK
 Group:		Sciences/Mathematics
 
@@ -85,25 +86,25 @@ Summary:	The BLAS (Basic Linear Algebra Subprograms) library
 Group:		Sciences/Mathematics
 Provides:	libblas = %{version}-%{release}
 
-%description -n	%{libblas}
+%description -n %{libblas}
 BLAS (Basic Linear Algebra Subprograms) is a standard library which
 provides a number of basic algorithms for numerical algebra. Man
 pages for blas are available in the blas-man package.
 
-%package -n	%{devblas}
+%package -n %{devblas}
 Summary:	BLAS development libraries
 Group:		Sciences/Mathematics
 Requires:	%{libblas} = %{version}-%{release}
 Provides:	blas-devel = %{version}-%{release}
 
-%description -n	%{devblas}
+%description -n %{devblas}
 BLAS development libraries for applications that link statically.
 
-%package -n	%{docblas}
+%package -n %{docblas}
 Summary:	Documentation for BLAS
 Group:		Sciences/Mathematics
 
-%description -n	%{docblas}
+%description -n %{docblas}
 Man pages / documentation for BLAS.
 
 %prep
@@ -122,7 +123,7 @@ rm -f manpages/blas/man/manl/{csrot.l,lsame.l,xerbla.l,xerbla_array.l,zdrot.l}
 	-DBUILD_TESTING=OFF \
 	-DCMAKE_Fortran_COMPILER_FORCED=ON \
 	-DCMAKE_SHARED_LINKER_FLAGS=-lgfortran
-%make
+%make_build
 cd ..
 
 %cmake \
@@ -131,10 +132,10 @@ cd ..
 	-DBUILD_TESTING=OFF \
 	-DCMAKE_Fortran_COMPILER_FORCED=ON \
 	-DCMAKE_SHARED_LINKER_FLAGS=-lgfortran
-%make
+%make_build
 
 %install
-%makeinstall_std -C build
+%make_install -C build
 
 install -m0644 build/lib/*.a %{buildroot}%{_libdir}/
 
@@ -179,9 +180,9 @@ cd ../..
 find blas/man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > blas-man-pages
 
 # remove weird man pages
-pushd man/man3
+cd man/man3
 rm -rf _Users_julie*
-popd
+cd ..
 
 find man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > lapack-man-pages
 
