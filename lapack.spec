@@ -1,5 +1,3 @@
-%define debug_package %{nil}
-
 # lapack
 %define major 3
 %define libname %mklibname %{name} %{major}
@@ -15,8 +13,8 @@
 
 Summary:	LAPACK libraries for linear algebra
 Name:		lapack
-Version:	3.9.0
-Release:	6
+Version:	3.10.0
+Release:	1
 License:	BSD-like
 Group:		Sciences/Mathematics
 Url:		http://www.netlib.org/lapack/
@@ -25,7 +23,6 @@ Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
 Patch0:		https://src.fedoraproject.org/rpms/lapack/raw/master/f/lapack-3.9.0-make.inc.patch
-Patch1:		https://github.com/Reference-LAPACK/lapack/commit/87536aa3c8bb0af00f66088fb6ac05d87509e011.patch
 BuildRequires:	cmake
 BuildRequires:	gcc-gfortran
 
@@ -81,7 +78,7 @@ Group:		Sciences/Mathematics
 %description -n %{docname}
 Man pages / documentation for LAPACK.
 
-%package -n	%{libblas}
+%package -n %{libblas}
 Summary:	The BLAS (Basic Linear Algebra Subprograms) library
 Group:		Sciences/Mathematics
 Provides:	libblas = %{version}-%{release}
@@ -123,6 +120,7 @@ rm -f manpages/blas/man/manl/{csrot.l,lsame.l,xerbla.l,xerbla_array.l,zdrot.l}
 	-DBUILD_TESTING=OFF \
 	-DCMAKE_Fortran_COMPILER_FORCED=ON \
 	-DCMAKE_SHARED_LINKER_FLAGS=-lgfortran
+
 %make_build
 cd ..
 
