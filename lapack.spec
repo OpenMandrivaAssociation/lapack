@@ -18,7 +18,7 @@ Release:	1
 License:	BSD-like
 Group:		Sciences/Mathematics
 Url:		http://www.netlib.org/lapack/
-Source0:	https://github.com/Reference-LAPACK/lapack/archive/v%{version}.tar.gz
+Source0:	https://github.com/Reference-LAPACK/lapack/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
 Source3:	http://www.netlib.org/lapack/manpages.tgz
