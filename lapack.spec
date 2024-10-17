@@ -17,7 +17,7 @@ Version:	3.10.0
 Release:	2
 License:	BSD-like
 Group:		Sciences/Mathematics
-Url:		http://www.netlib.org/lapack/
+Url:		https://www.netlib.org/lapack/
 Source0:	https://github.com/Reference-LAPACK/lapack/archive/v%{version}.tar.gz
 Source1:	http://www.netlib.org/lapack/lapackqref.ps
 Source2:	http://www.netlib.org/blas/blasqr.ps
