@@ -265,7 +265,7 @@ export FC=gfortran
 export default_optflags=" -g %{optflags}"
 
 cp -a CMakeLists.txt CMakeLists.txt.orig
-for d in {SHARED%{?with_static:,STATIC}}%{?arch64:{,64}}
+for d in {SHARED%{?with_static:,STATIC}%{?with_static_pic:,STATIC_PIC}}%{?arch64:{,64}}
 do
 	cp -a CMakeLists.txt.orig CMakeLists.txt.$d
 
@@ -320,10 +320,10 @@ done
 %install
 for d in {SHARED%{?with_static:,STATIC}%{?with_static_pic:,STATIC_PIC}}%{?arch64:{,64}}
 do
-	mv %_vpath_builddir-$d %_vpath_builddir
+	ln -fs %_vpath_builddir-$d build
 	ln -fs CMakeLists.txt.$d CMakeLists.txt
 	%ninja_install -C build
-	mv %_vpath_builddir %_vpath_builddir-$d
+	rm build
 done
 
 # man
@@ -376,4 +376,16 @@ find man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > lapack-man-pages
 
 cp -f blas/man/man3/* %{buildroot}%{_mandir}/man3
 cp -f man/man3/* %{buildroot}%{_mandir}/man3
+
+%check
+%if %{?with_testing}
+for d in {SHARED%{?with_static:,STATIC}%{?with_static_pic:,STATIC_PIC}}%{?arch64:{,64}}
+do
+	ln -fs %_vpath_builddir-$d build
+	pushd build
+	ctest
+	popd 1>/dev/null
+	rm build
+done
+%endif
 
