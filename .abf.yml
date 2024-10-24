@@ -1,5 +1,5 @@
 sources:
   blasqr.ps: 01bf77cd3374a4ce5686c0e38556b6620e018987
   lapackqref.ps: d552e8d06b18df797f7b8bb14c346eb6303ae9f5
-  manpages.tgz: eb9ce19ce73e645bfb22af5480f16190baf09ae3
-  v3.10.0.tar.gz: 4a9384523bf236c83568884e8c62d9517e41ac42
+  manpages.tgz: 7f92dd7c25b09b2da40f452b1bfbf5cffe12641d
+  lapack-3.12.0.tar.gz: 3661a879f31b517f43db2b94a1f2831da3235138
