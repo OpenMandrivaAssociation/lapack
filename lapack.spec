@@ -1,27 +1,21 @@
-%bcond deprecated	1
-%bcond cblas		1
-%bcond lapacke		1
-%bcond static		1
-%bcond testing		1
-%bcond xblas		0
+%global optflags %{optflags} -O3
 
 # lapack
 %define major 3
 %define lapack_libname %mklibname %{name}
 %define lapack_devname %mklibname %{name} -d
+%define lapack_staticdevname %mklibname %{name} -s -d
 %define lapack_oldlibname %mklibname %{name} 3
 %define lapack_olddevname %mklibname %{name} 3 -d
 %define lapack_docname %{name}-doc
 
 # blas
-%define libblas %mklibname blas
 %define blas_libname %mklibname blas
 %define blas_devname %mklibname blas -d
+%define blas_staticdevname %mklibname blas -s -d
 %define blas_oldlibname %mklibname blas 3
 %define blas_olddevname %mklibname blas 3 -d
-%define blas_docname blas-doc
-
-%global optflags %{optflags} -O3
+%define blas_docname %{blas_libname}-doc
 
 %if %{?__isa_bits:%{__isa_bits}}%{!?__isa_bits:32} == 64
 %global arch64 1
@@ -29,21 +23,55 @@
 %global arch64 0
 %endif
 
-Summary:	LAPACK libraries for linear algebra
+Summary:	LAPACK Libraries for Linear Algebra
 Name:		lapack
 Version:	3.12.1
 Release:	1
-License:	BSD-like
+License:	BSD-3-Clause-Open-MPI
 Group:		Sciences/Mathematics
 Url:		https://www.netlib.org/lapack/
 Source0:	https://github.com/Reference-LAPACK/lapack/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1:	https://www.netlib.org/lapack/lapackqref.ps
 Source2:	https://www.netlib.org/blas/blasqr.ps
-Source3:	https://www.netlib.org/lapack/manpages.tgz
-BuildRequires:	cmake ninja
-BuildRequires:	gcc-gfortran
+# NOTE	In OMLx the LAPACK/BLAS doc/man pages are generated from source since v3.12.1,
+# NOTE	therefore we have no need for the Source3 unversioned manpages tarball.
+# NOTE	Keeping Source3 linked here meantime in-case upstream changes doc generation situation.
+#Source3:	https://www.netlib.org/lapack/manpages.tgz
 
-%description
+# Patches for 3.12.1 due to upstream release issues and bugs affecting successful compilation.
+# Patch0:	https://github.com/Reference-LAPACK/lapack/pull/1093
+Patch0:		https://github.com/Reference-LAPACK/lapack/pull/1093/commits/3aa877584bcc96e1a0ee37742628946c56afc15f.patch
+# Patch1:	https://github.com/Reference-LAPACK/lapack/pull/1094
+Patch1:		https://github.com/Reference-LAPACK/lapack/pull/1094/commits/f5103fc3b42fcff40e70b1fa4b5567df01dae9bc.patch
+# Patch2:	https://github.com/Reference-LAPACK/lapack/pull/1095
+Patch2:		https://github.com/Reference-LAPACK/lapack/pull/1095/commits/3e242fc8d5d38f0425c6018fe88abf31e1a9e80f.patch
+# Patch3:	updates for doxygen 1.12
+Patch3:		https://github.com/Reference-LAPACK/lapack/pull/1096/commits/31cd658cbd944e57aebd510725833f512b05c259.patch
+# Patch4|5|6:	Fix line reflow in some of the deprecated sources (3/3)
+#				https://github.com/Reference-LAPACK/lapack/pull/1099
+Patch4:		https://github.com/Reference-LAPACK/lapack/pull/1099/commits/304fa305e85190c934e78eae75c7b092fcfd54c1.patch
+Patch5:		https://github.com/Reference-LAPACK/lapack/pull/1099/commits/bc0c38f247f90f815a93f6ca0829004120745da4.patch
+Patch6:		https://github.com/Reference-LAPACK/lapack/pull/1099/commits/3c209c6bdf524869d18d00119aeae4962740c3b3.patch
+# Patch7:	Update Source code to fix issue with links in Doxygen
+#			https://github.com/Reference-LAPACK/lapack/pull/1101/
+Patch7:		https://github.com/Reference-LAPACK/lapack/pull/1101/commits/59f136760fb5cc62e9377c5d9103785037b7c660.patch
+# Patch8:	Fix the testsuite of xGEMMTR
+#			https://github.com/Reference-LAPACK/lapack/pull/1107
+Patch8:		https://github.com/Reference-LAPACK/lapack/pull/1107/commits/4c637b83298e7b0777478194e1bc37d3af171504.patch
+
+# Patch9:	Tweak CMakeLists & Makefile to strip source code from html generation output, reduce stub bloat & drop call graphs.
+# NOTE	The use of the Makefile over CMakeLists is to enable man page and html doc generation as a build step.
+# NOTE	Upstream's CMakeLists do not successfully complete these tasks, we fall back to using upstreams Makefile doc
+# NOTE	and html tasks instead as they work successfully.
+Patch9:		lapack-3.12.1-cmake-doxygen.patch
+
+BuildRequires:	cmake ninja make
+BuildRequires:	gcc-gfortran
+BuildRequires:	lib64absl-devel >= 20250127.0
+BuildRequires:	doxygen
+Requires:	%{blas_libname} = %{version}-%{release}
+
+%global _description_lapack %{expand:
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
 linear algebra. LAPACK provides routines for solving systems of
 simultaneous linear equations, least-squares solutions of linear
@@ -55,337 +83,398 @@ are also included. LAPACK can handle dense and banded matrices, but
 not general sparse matrices. Similar functionality is provided for
 real and complex matrices in both single and double precision. LAPACK
 is coded in Fortran77 and built with gcc.
+}
 
-The lapack package provides the dynamic libraries for LAPACK/BLAS.
+%global _description_blas %{expand:
+BLAS (Basic Linear Algebra Subprograms) is a standard library which
+provides a number of basic algorithms for numerical algebra.
+}
 
-#---------------------------------------------------------------------------
+%description	%_description_lapack
 
-%package -n %{lapack_libname}
-Summary:	LAPACK libraries for linear algebra
+####################################
+# lapack-lib
+%package	-n	%{lapack_libname}
+Summary:	LAPACK Libraries for Linear Algebra
 Group:		Sciences/Mathematics
-Provides:	lib%{name} = %{version}-%{release}
+Provides:	%{blas_libname} = %{version}-%{release}
+Suggests:	%{lapack_docname} = %{version}-%{release}
 Obsoletes:	%{lapack_oldlibname} < %{EVRD}
 
-%description -n %{lapack_libname}
-LAPACK (Linear Algebra PACKage) is a standard library for numerical
-linear algebra. LAPACK provides routines for solving systems of
-simultaneous linear equations, least-squares solutions of linear
-systems of equations, eigenvalue problems, and singular value
-problems. Associated matrix factorizations (LU, Cholesky, QR, SVD,
-Schur, and generalized Schur) and related computations (i.e.,
-reordering of Schur factorizations and estimating condition numbers)
-are also included. LAPACK can handle dense and banded matrices, but
-not general sparse matrices. Similar functionality is provided for
-real and complex matrices in both single and double precision. LAPACK
-is coded in Fortran77 and built with gcc.
-
-The lapack package provides the dynamic libraries for LAPACK/BLAS.
-
-%files -n %{lapack_libname}
-%license LICENSE
-%{_libdir}/liblapack.so.%{major}*
-%if %{?with_lapacke}
-%{_libdir}/liblapacke.so.%{major}*
-%{_libdir}/libtmglib.so.%{major}*
-%endif
+%description	-n %{lapack_libname} %_description_lapack
 %if 0%{?arch64}
-%{_libdir}/liblapack64.so.%{major}*
-%if %{?with_lapacke}
-%{_libdir}/liblapacke64.so.%{major}*
-%{_libdir}/libtmglib64.so.%{major}*
-%endif
+Includes 64bit and 64bit INDEX Libraries both
+with and without symbol name suffixes
 %endif
 
-#-----------------------------------------------------------------------
-
-%package -n %{lapack_devname}
-Summary:	LAPACK static library
+####################################
+# lapack-devel
+%package	-n %{lapack_devname}
+Summary:	LAPACK Development Libraries
 Group:		Sciences/Mathematics
-Requires:	%{lapack_libname} = %{version}-%{release}
-Provides:	%{name}-devel = %{version}-%{release}
+Requires:	%{lapack_libname}%{_isa} = %{version}-%{release}
+Requires:	%{blas_devname}%{_isa} = %{version}-%{release}
+Suggests:	%{lapack_docname} = %{version}-%{release}
 Obsoletes:	%{lapack_olddevname} < %{EVRD}
 
 %description -n %{lapack_devname}
-This package contains the headers and development libraries
-necessary to develop or compile applications using lapack.
+LAPACK Development Libraries (shared).
 
-%files -n %{lapack_devname}
-%license LICENSE
-%{_includedir}/lapack*.h
-%{_libdir}/liblapack.so
-%if %{?with_static}
-%{_libdir}/liblapack.a
-%endif
-%{_libdir}/pkgconfig/lapack.pc
-%{_libdir}/cmake/lapack-%{version}/lapack-*.cmake
-%if %{?with_lapacke}
-%{_libdir}/liblapacke.so
-%{_libdir}/libtmglib.so
-%if %{?with_static}
-%{_libdir}/libtmglib.a
-%{_libdir}/liblapacke.a
-%endif
-%{_libdir}/pkgconfig/lapacke.pc
-%{_libdir}/cmake/lapacke-%{version}/lapacke-*.cmake
-%endif
-%if 0%{?arch64}
-%{_libdir}/liblapack64.so
-%if %{?with_static}
-%{_libdir}/liblapack64.a
-%endif
-%{_libdir}/pkgconfig/lapack64.pc
-%{_libdir}/cmake/lapack64-%{version}/lapack64-*.cmake
-%if %{?with_lapacke}
-%{_libdir}/liblapacke64.so
-%{_libdir}/libtmglib64.so
-%if %{?with_static}
-%{_libdir}/libtmglib64.a
-%{_libdir}/liblapacke64.a
-%endif
-%{_libdir}/pkgconfig/lapacke64.pc
-%{_libdir}/cmake/lapacke64-%{version}/lapacke64-*.cmake
-%endif
-%endif
-
-#---------------------------------------------------------------------------
-
-%package -n %{lapack_docname}
-Summary:	Documentation for LAPACK
+####################################
+# lapack-static-devel
+%package	-n %{lapack_staticdevname}
+Summary:	LAPACK Static Libraries
 Group:		Sciences/Mathematics
+Requires:	%{lapack_devname}%{?_isa} = %{version}-%{release}
 
-%description -n %{lapack_docname}
-Man pages / documentation for LAPACK.
+%description	-n %{lapack_staticdevname}
+LAPACK Static Libraries.
 
-%files -n %{lapack_docname} -f lapack-man-pages
-%license LICENSE
-%doc README.md lapackqref.ps
-
-#---------------------------------------------------------------------------
-
-%package -n %{blas_libname}
-Summary:	The BLAS (Basic Linear Algebra Subprograms) library
+####################################
+# lapack-doc
+%package	-n %{lapack_docname}
+Summary:	LAPACK and LBAS Documentation
 Group:		Sciences/Mathematics
-Provides:	libblas = %{version}-%{release}
+BuildArch:	noarch
+Provides:	%{lapack_docname} = %{version}-%{release}
+Obsoletes:	%{name}-doc < %{EVRD}
+
+%description	-n %{lapack_docname}
+Documentation html and man pages for LAPACK and BLAS.
+
+####################################
+# blas-lib
+%package	-n %{blas_libname}
+Summary:	The Basic Linear Algebra Subprograms Library
+Group:		Sciences/Mathematics
+Provides:	%{blas_libname} = %{version}-%{release}
+Suggests:	%{lapack_docname} = %{version}-%{release}
 Obsoletes:	%{blas_oldlibname} < %{EVRD}
 
-%description -n %{blas_libname}
-BLAS (Basic Linear Algebra Subprograms) is a standard library which
-provides a number of basic algorithms for numerical algebra. Man
-pages for blas are available in the blas-man package.
-
-%files -n %{blas_libname}
-%license LICENSE
-%{_libdir}/libblas.so.%{major}*
-%if %{?with_cblas}
-%{_libdir}/libcblas.so.%{major}*
-%endif
+%description	-n %{blas_libname} %_description_blas
 %if 0%{?arch64}
-%{_libdir}/libblas64.so.%{major}*
-%if %{?with_cblas}
-%{_libdir}/libcblas64.so.%{major}*
-%endif
+Includes 64bit and 64bit INDEX Libraries both
+with and without symbol name suffixes
 %endif
 
-#---------------------------------------------------------------------------
-
-%package -n %{blas_devname}
-Summary:	BLAS development libraries
+####################################
+# blas-devel
+%package	-n %{blas_devname}
+Summary:	BLAS Development Libraries
 Group:		Sciences/Mathematics
-Requires:	%{blas_libname} = %{version}-%{release}
-Provides:	blas-devel = %{version}-%{release}
+Requires:	%{blas_libname}%{_isa} = %{version}-%{release}
+Requires:	gcc-gfortran
 Obsoletes:	%{blas_olddevname} < %{EVRD}
 
-%description -n %{blas_devname}
-BLAS development libraries for applications that link statically.
+%description	-n %{blas_devname}
+BLAS Development Libraries (shared).
 
-%files -n %{blas_devname}
-%license LICENSE
-%{_libdir}/libblas.so
-%if %{?with_static}
-%{_libdir}/libblas.a
-%endif
-%{_libdir}/pkgconfig/blas.pc
-
-%if %{?with_cblas}
-%{_includedir}/cblas*.h
-%{_libdir}/libcblas.so
-%if %{?with_static}
-%{_libdir}/libcblas.a
-%endif
-%{_libdir}/pkgconfig/cblas.pc
-%{_libdir}/cmake/cblas-%{version}/cblas-*.cmake
-%endif
-
-%if 0%{?arch64}
-%{_libdir}/libblas64.so
-%if %{?with_static}
-%{_libdir}/libblas64.a
-%endif
-%{_libdir}/pkgconfig/blas64.pc
-
-%if %{?with_cblas}
-%{_libdir}/libcblas64.so
-%if %{?with_static}
-%{_libdir}/libcblas64.a
-%endif
-%{_libdir}/pkgconfig/cblas64.pc
-%{_libdir}/cmake/cblas64*-%{version}/cblas64-*.cmake
-%endif
-%endif
-
-#---------------------------------------------------------------------------
-
-%package -n %{blas_docname}
-Summary:	Documentation for BLAS
+####################################
+# blas-static-devel
+%package	-n %{blas_staticdevname}
+Summary:	BLAS Static Libraries
 Group:		Sciences/Mathematics
+Requires:	%{blas_devname}%{_isa} = %{version}-%{release}
 
-%description -n %{blas_docname}
-Man pages / documentation for BLAS.
+%description -n %{blas_staticdevname}
+BLAS Static Libraries.
 
-%files -n %{blas_docname} -f blas-man-pages
-%license LICENSE
-%doc blasqr.ps
 
-#---------------------------------------------------------------------------
-
+####################################
 %prep
-%autosetup -p1 -a3
+%autosetup -p1
+mkdir -p ./build/DOCS/
+cp ./DOCS/* ./build/DOCS
+# copy makefile and make.inc into build for manpage and html generation
+cp Makefile ./build
+cp make.inc.example ./build/make.inc
 
-cp %{SOURCE1} lapackqref.ps
-cp %{SOURCE2} blasqr.ps
 
-# purge apple stuff
-rm -rf man/man3/.*.3
-
+####################################
 %build
 %global optflags %{optflags} -fno-optimize-sibling-calls
-export CC=gcc
-export CXX=g++
-export FC=gfortran
-export default_optflags=" -g %{optflags}"
+export default_optflags="-g %{optflags}"
+# hush the build log fortran f951 warning spam, substantially reduces log size
+export FFLAGS="-fallow-argument-mismatch"
+export CC=/usr/bin/gcc
+export CXX=/usr/bin/g++
+export FC=/usr/bin/gfortran
 
-cp -a CMakeLists.txt CMakeLists.txt.orig
-for d in {SHARED%{?with_static:,STATIC}%{?with_static_pic:,STATIC_PIC}}%{?arch64:{,64}}
-do
-	cp -a CMakeLists.txt.orig CMakeLists.txt.$d
+####################################
+# Shared Regular Libraries, man page & html doc generation.
+# NOTE	doc generation requires this build stage's files to generate from.
+%global optflags ${default_optflags}
+%cmake  -G Ninja -DCMAKE_SKIP_RPATH:BOOL=ON -DBUILD_DEPRECATED=ON \
+		-DBUILD_SHARED_LIBS=ON -DLAPACKE=ON -DLAPACKE_WITH_TMG=ON -DCBLAS=ON
+%ninja_build
+make man
+make html
+cd ..
+# move docs out to own directory to preserve for install stage
+mkdir -p %_vpath_builddir-DOCS
+cp -r %_vpath_builddir/DOCS/* %_vpath_builddir-DOCS
+mkdir -p %_vpath_builddir-SHARED
+mv %_vpath_builddir/* %_vpath_builddir-SHARED
 
-	if [[ "$d" =~ "STATIC_PIC" ]]; then
-		STATIC=ON
-		SHARED=OFF
-		%global optflags ${default_optflags} -fPIC
 
-		# change lib names
-		sed -i \
-			-e 's,set(BLASLIB "blas"),set(BLASLIB "blas_pic"),g' \
-			-e 's,set(CBLASLIB "cblas"),set(CBLASLIB "cblas_pic"),g' \
-			-e 's,set(LAPACKLIB "lapack"),set(LAPACKLIB "lapack_pic"),g' \
-			-e 's,set(LAPACKELIB "lapacke"),set(LAPACKELIB "lapacke_pic"),g' \
-			-e 's,set(TMGLIB "tmglib"),set(TMGLIB "tmglib_pic"),g' \
-			-e 's,set(BLASLIB "blas64"),set(BLASLIB "blas_pic64"),g' \
-			-e 's,set(CBLASLIB "cblas64"),set(CBLASLIB "cblas_pic64"),g' \
-			-e 's,set(LAPACKLIB "lapack64"),set(LAPACKLIB "lapack_pic64"),g' \
-			-e 's,set(LAPACKELIB "lapacke64"),set(LAPACKELIB "lapacke_pic64"),g' \
-			-e 's,set(TMGLIB "tmglib64"),set(TMGLIB "tmglib_pic64"),g' \
-			CMakeLists.txt.$d
-	elif [[ "$d" =~ "STATIC" ]]; then
-		STATIC=ON
-		SHARED=OFF
-		%global optflags ${default_optflags}
-	else
-		STATIC=OFF
-		SHARED=ON
-		%global optflags ${default_optflags}
-	fi
-	[[ "$d" =~ "64" ]] && INDEX64=ON || INDEX64=OFF
+####################################
+# Static Regular Libraries
+%global optflags ${default_optflags} -fPIC
+%cmake -G Ninja -DBUILD_DEPRECATED=ON -DBUILD_SHARED_LIBS=OFF -DLAPACKE=ON \
+		-DLAPACKE_WITH_TMG=ON -DCBLAS=ON
+%ninja_build
+cd ..
+mv %_vpath_builddir %_vpath_builddir-STATIC
 
-	ln -fs CMakeLists.txt.$d CMakeLists.txt
-	%cmake -Wno-dev \
-		-DCMAKE_Fortran_FLAGS:STRING="$FFLAGS -frecursive" \
-		-DBUILD_STATIC_LIBS:BOOL=$STATIC \
-		-DBUILD_SHARED_LIBS:BOOL=$SHARED \
-		-DBUILD_DEPRECATED:BOOL=%{?with_deprecated:ON}%{?!with_deprecated:OFF} \
-		-DLAPACKE:BOOL=%{?with_lapacke:ON}%{?!with_lapacke:OFF} \
-		-DLAPACKE_WITH_TMG:BOOL=%{?with_lapacke:ON}%{?!with_lapacke:OFF} \
-		-DCBLAS:BOOL=%{?with_cblas:ON}%{?!with_cblas:OFF} \
-		-DXBLAS:BOOL=%{?with_xblas:ON}%{?!with_xblas:OFF} \
-		-DBUILD_INDEX64:BOOL=$INDEX64 \
-		-DBUILD_TESTING:BOOL=%{?with_testing:ON}%{?!with_testing:OFF} \
-		-GNinja
-	%ninja_build
 
-	cd ..
-	mv %_vpath_builddir %_vpath_builddir-$d
-done
+####################################
+# 64bit INDEX Libraries
+%if 0%{?arch64}
+# BLAS Shared 64bit INDEX Libraries
+%global optflags ${default_optflags}
+%cmake -G Ninja -DCMAKE_SKIP_RPATH:BOOL=ON -DBUILD_DEPRECATED=ON \
+		-DBUILD_SHARED_LIBS=ON -DBUILD_INDEX64=ON -DLAPACKE=OFF -DCBLAS=ON
+%ninja_build
+cd ..
+mv %_vpath_builddir %_vpath_builddir-SHARED64
 
+# BLAS Static 64 bit INDEX Libraries
+%global optflags ${default_optflags} -fPIC
+%cmake -G Ninja -DBUILD_DEPRECATED=ON -DBUILD_SHARED_LIBS=OFF \
+		-DBUILD_INDEX64=ON -DLAPACKE=OFF -DCBLAS=ON
+%ninja_build
+cd ..
+mv %_vpath_builddir %_vpath_builddir-STATIC64
+
+# BLAS Shared 64bit INDEX SUFFIX Libraries
+%global optflags ${default_optflags}
+sed -i 's|64"|64_"|g' CMakeLists.txt
+%cmake -G Ninja -DCMAKE_SKIP_RPATH:BOOL=ON -DBUILD_DEPRECATED=ON \
+		-DBUILD_SHARED_LIBS=ON -DBUILD_INDEX64=ON -DLAPACKE=OFF -DCBLAS=ON
+%ninja_build
+cd ..
+mv %_vpath_builddir %_vpath_builddir-SHARED64SUFFIX
+
+# BLAS Static 64bit INDEX SUFFIX Libraries
+%global optflags ${default_optflags} -fPIC
+%cmake -G Ninja -DBUILD_DEPRECATED=ON -DBUILD_SHARED_LIBS=OFF \
+		-DBUILD_INDEX64=ON -DLAPACKE=OFF -DCBLAS=ON
+%ninja_build
+cd ..
+mv %_vpath_builddir %_vpath_builddir-STATIC64SUFFIX
+
+# Undo the 64_ suffix
+sed -i 's|64_"|64"|g' CMakeLists.txt
+%endif
+
+####################################
+# LAPACK Static regular FPIC Libraries
+%global optflags ${default_optflags} -fPIC
+%cmake -G Ninja -DBUILD_DEPRECATED=ON -DBUILD_SHARED_LIBS=OFF -DLAPACKE=OFF
+%ninja_build
+cd ..
+mv %_vpath_builddir %_vpath_builddir-STATICFPIC
+mv %_vpath_builddir-STATICFPIC/lib/liblapack.a %_vpath_builddir-STATICFPIC/lib/liblapack_pic.a
+
+####################################
+%if 0%{?arch64}
+# LAPACK Static 64bit INDEX FPIC Libraries
+%global optflags ${default_optflags} -fPIC
+%cmake -G Ninja -DBUILD_DEPRECATED=ON -DBUILD_SHARED_LIBS=OFF \
+		-DBUILD_INDEX64=ON -DLAPACKE=OFF -DCBLAS=OFF
+%ninja_build
+cd ..
+mv %_vpath_builddir %_vpath_builddir-STATIC64FPIC
+mv %_vpath_builddir-STATIC64FPIC/lib/liblapack64.a %_vpath_builddir-STATIC64FPIC/lib/liblapack_pic64.a
+
+# LAPACK Static 64bit INDEX suffixed FPIC Libraries
+%global optflags ${default_optflags} -fPIC
+sed -i 's|64"|64_"|g' CMakeLists.txt
+%cmake -G Ninja -DBUILD_DEPRECATED=ON -DBUILD_SHARED_LIBS=OFF \
+		-DBUILD_INDEX64=ON -DLAPACKE=OFF -DCBLAS=OFF
+%ninja_build
+cd ..
+mv %_vpath_builddir %_vpath_builddir-STATIC64SUFFIXFPIC
+mv %_vpath_builddir-STATIC64SUFFIXFPIC/lib/liblapack64_.a %_vpath_builddir-STATIC64SUFFIXFPIC/lib/liblapack_pic64_.a
+
+# Undo the 64_ suffix
+sed -i 's|64_"|64"|g' CMakeLists.txt
+%endif
+
+####################################
+# copy source scripts, pdf file and CBLAS.md into build
+cp -p %{SOURCE1} %_vpath_builddir-DOCS/lapackqref.ps
+cp -p %{SOURCE2} %_vpath_builddir-DOCS/blasqr.ps
+cp -p DOCS/lapacke.pdf %_vpath_builddir-DOCS/lapacke.pdf
+cp -p DOCS/CBLAS.md %_vpath_builddir-DOCS/CBLAS.md
+
+
+####################################
 %install
-for d in {SHARED%{?with_static:,STATIC}%{?with_static_pic:,STATIC_PIC}}%{?arch64:{,64}}
-do
-	ln -fs %_vpath_builddir-$d build
-	ln -fs CMakeLists.txt.$d CMakeLists.txt
-	%ninja_install -C build
-	rm build
+%if 0%{?arch64}
+for i in SHARED SHARED64 STATIC STATIC64; do
+%else
+for i in SHARED STATIC; do
+%endif
+	mv	%_vpath_builddir-$i %_vpath_builddir
+	cd %_vpath_builddir
+	%ninja_install
+	cd ..
+	mv %_vpath_builddir %_vpath_builddir-$i
 done
 
-# man
+
+%if 0%{?arch64}
+sed -i 's|64"|64_"|g' CMakeLists.txt
+for i in SHARED64SUFFIX STATIC64SUFFIX; do
+	mv %_vpath_builddir-$i %_vpath_builddir
+	cd %_vpath_builddir
+	%ninja_install
+	cd ..
+	mv %_vpath_builddir %_vpath_builddir-$i
+done
+%endif
+
+####################################
+# install html and man directories
+install -dpm 0755 %{buildroot}%{_docdir}/%{name}/html
 install -dpm 0755 %{buildroot}%{_mandir}/man3
+# move docs and ps files into docdir
+cp -p README.md %{buildroot}%{_docdir}/%{name}
+cp -p LICENSE %{buildroot}%{_docdir}/%{name}
+mv %_vpath_builddir-DOCS/lapackqref.ps %{buildroot}%{_docdir}/%{name}
+mv %_vpath_builddir-DOCS/blasqr.ps %{buildroot}%{_docdir}/%{name}
+mv %_vpath_builddir-DOCS/lapacke.pdf %{buildroot}%{_docdir}/%{name}
+mv %_vpath_builddir-DOCS/CBLAS.md %{buildroot}%{_docdir}/%{name}
 
-# Blas manpages
-mkdir -p blas/man/man3
-cd man/man3/
-mv caxpy.f.3 caxpy.3 ccopy.f.3 ccopy.3 cdotc.f.3 cdotc.3 cdotu.f.3 cdotu.3 cgbmv.f.3 cgbmv.3 \
-cgemm.f.3 cgemm.3 cgemv.f.3 cgemv.3 cgerc.f.3 cgerc.3 cgeru.f.3 cgeru.3 chbmv.f.3 chbmv.3 \
-chemm.f.3 chemm.3 chemv.f.3 chemv.3 cher.f.3 cher.3 cher2.f.3 cher2.3 cher2k.f.3 cher2k.3 \
-cherk.f.3 cherk.3 chpmv.f.3 chpmv.3 chpr.f.3 chpr.3 chpr2.f.3 chpr2.3 \
-cscal.f.3 cscal.3 csrot.f.3 csrot.3 csscal.f.3 csscal.3 cswap.f.3 cswap.3 csymm.f.3 \
-csymm.3 csyr2k.f.3 csyr2k.3 csyrk.f.3 csyrk.3 ctbmv.f.3 ctbmv.3 ctbsv.f.3 ctbsv.3 ctpmv.f.3 \
-ctpmv.3 ctpsv.f.3 ctpsv.3 ctrmm.f.3 ctrmm.3 ctrmv.f.3 ctrmv.3 ctrsm.f.3 ctrsm.3 ctrsv.f.3 \
-ctrsv.3 dasum.f.3 dasum.3 daxpy.f.3 daxpy.3 dcabs1.f.3 dcabs1.3 dcopy.f.3 dcopy.3 ddot.f.3 \
-ddot.3 dgbmv.f.3 dgbmv.3 dgemm.f.3 dgemm.3 dgemv.f.3 dgemv.3 dger.f.3 dger.3 \
-drot.f.3 drot.3 drotm.f.3 drotm.3 drotmg.f.3 drotmg.3 dsbmv.f.3 \
-dsbmv.3 dscal.f.3 dscal.3 dsdot.f.3 dsdot.3 dspmv.f.3 dspmv.3 dspr.f.3 dspr.3 dspr2.f.3 \
-dspr2.3 dswap.f.3 dswap.3 dsymm.f.3 dsymm.3 dsymv.f.3 dsymv.3 dsyr.f.3 dsyr.3 dsyr2.f.3 \
-dsyr2.3 dsyr2k.f.3 dsyr2k.3 dsyrk.f.3 dsyrk.3 dtbmv.f.3 dtbmv.3 dtbsv.f.3 dtbsv.3 dtpmv.f.3 \
-dtpmv.3 dtpsv.f.3 dtpsv.3 dtrmm.f.3 dtrmm.3 dtrmv.f.3 dtrmv.3 dtrsm.f.3 dtrsm.3 dtrsv.f.3 \
-dtrsv.3 dzasum.f.3 dzasum.3 icamax.f.3 icamax.3 idamax.f.3 idamax.3 \
-isamax.f.3 isamax.3 izamax.f.3 izamax.3 lsame.3 sasum.f.3 sasum.3 saxpy.f.3 saxpy.3 \
-scabs1.f.3 scabs1.3 scasum.f.3 scasum.3 scopy.f.3 scopy.3 sdot.f.3 sdot.3 \
-sdsdot.f.3 sdsdot.3 sgbmv.f.3 sgbmv.3 sgemm.f.3 sgemm.3 sgemv.f.3 sgemv.3 sger.f.3 sger.3 \
-srot.f.3 srot.3 srotm.f.3 srotm.3 srotmg.f.3 srotmg.3 \
-ssbmv.f.3 ssbmv.3 sscal.f.3 sscal.3 sspmv.f.3 sspmv.3 sspr.f.3 sspr.3 sspr2.f.3 sspr2.3 \
-sswap.f.3 sswap.3 ssymm.f.3 ssymm.3 ssymv.f.3 ssymv.3 ssyr.f.3 ssyr.3 ssyr2.f.3 ssyr2.3 \
-ssyr2k.f.3 ssyr2k.3 ssyrk.f.3 ssyrk.3 stbmv.f.3 stbmv.3 stbsv.f.3 stbsv.3 stpmv.f.3 stpmv.3 \
-stpsv.f.3 stpsv.3 strmm.f.3 strmm.3 strmv.f.3 strmv.3 strsm.f.3 strsm.3 strsv.f.3 strsv.3 \
-xerbla.3 xerbla_array.3 zaxpy.f.3 zaxpy.3 zcopy.f.3 zcopy.3 \
-zdotc.f.3 zdotc.3 zdotu.f.3 zdotu.3 zdrot.f.3 zdrot.3 zdscal.f.3 zdscal.3 zgbmv.f.3 zgbmv.3 \
-zgemm.f.3 zgemm.3 zgemv.f.3 zgemv.3 zgerc.f.3 zgerc.3 zgeru.f.3 zgeru.3 zhbmv.f.3 zhbmv.3 \
-zhemm.f.3 zhemm.3 zhemv.f.3 zhemv.3 zher.f.3 zher.3 zher2.f.3 zher2.3 zher2k.f.3 zher2k.3 \
-zherk.f.3 zherk.3 zhpmv.f.3 zhpmv.3 zhpr.f.3 zhpr.3 zhpr2.f.3 zhpr2.3 \
-zscal.f.3 zscal.3 zswap.f.3 zswap.3 zsymm.f.3 zsymm.3 zsyr2k.f.3 zsyr2k.3 zsyrk.f.3 zsyrk.3 \
-ztbmv.f.3 ztbmv.3 ztbsv.f.3 ztbsv.3 ztpmv.f.3 ztpmv.3 ztpsv.f.3 ztpsv.3 ztrmm.f.3 ztrmm.3 \
-ztrmv.f.3 ztrmv.3 ztrsm.f.3 ztrsm.3 ztrsv.f.3 ztrsv.3 ../../blas/man/man3
-cd ../..
+# move html from builddir in to docdir
+mv %_vpath_builddir-DOCS/html %{buildroot}%{_docdir}/%{name}
 
-find blas/man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > blas-man-pages
+# remove junk manpages
+rm %_vpath_builddir-DOCS/man/man3/_home*.3
+rm %_vpath_builddir-DOCS/man/man3/__*_.3
+# compress manpages & remove input files after compression: 41.8 MiB => 9.44 MiB
+zstd -r --rm %_vpath_builddir-DOCS/man/man3
+# move man pages from builddir in to mandir
+mv %_vpath_builddir-DOCS/man/man3 %{buildroot}%{_mandir}
+####################################
 
-# remove weird man pages
-cd man/man3
-rm -rf _Users_julie*
-cd -
+install -m0644 %_vpath_builddir-STATICFPIC/lib/liblapack_pic.a %{buildroot}%{_libdir}
+%if 0%{?arch64}
+install -m0644 %_vpath_builddir-STATIC64FPIC/lib/liblapack_pic64.a %{buildroot}%{_libdir}
+install -m0644 %_vpath_builddir-STATIC64SUFFIXFPIC/lib/liblapack_pic64_.a %{buildroot}%{_libdir}
 
-find man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > lapack-man-pages
-
-cp -f blas/man/man3/* %{buildroot}%{_mandir}/man3
-cp -f man/man3/* %{buildroot}%{_mandir}/man3
-
-%check
-%if %{?with_testing}
-for d in {SHARED%{?with_static:,STATIC}%{?with_static_pic:,STATIC_PIC}}%{?arch64:{,64}}
-do
-	ln -fs %_vpath_builddir-$d build
-	pushd build
-	ctest
-	popd 1>/dev/null
-	rm build
+pushd %{buildroot}%{_libdir}
+for name in blas cblas lapack; do
+	for i in `readelf -Ws lib${name}64_.so.%{version} | awk '{print $8}' | grep -v GLIBC |grep -v GFORTRAN |grep -v "Name" `; do echo "$i" "64_$i"; done > ${name}-prefix.def.dirty
+	sort -n ${name}-prefix.def.dirty | uniq > ${name}-prefix.def
+	llvm-objcopy --redefine-syms ${name}-prefix.def lib${name}64_.so.%{version} lib${name}64_.so.%{version}.fixed
+	rm -rf lib${name}64_.so.%{version}
+	mv lib${name}64_.so.%{version}.fixed lib${name}64_.so.%{version}
 done
+
+for name in blas cblas lapack lapack_pic; do
+	for i in `llvm-nm lib${name}64_.a |grep " T " | awk '{print $3}'`; do echo "$i" "64_$i"; done > ${name}-static-prefix.def.dirty
+	sort -n ${name}-static-prefix.def.dirty | uniq > ${name}-static-prefix.def
+	llvm-objcopy --redefine-syms ${name}-static-prefix.def lib${name}64_.a lib${name}64_.a.fixed
+	rm -rf lib${name}64_.a
+	mv lib${name}64_.a.fixed lib${name}64_.a
+done
+popd
+# remove def build artifacts
+rm -rf %{buildroot}%{_libdir}/*.def*
+%endif
+
+
+####################################
+%files	-n %{lapack_libname}
+%{_libdir}/liblapack.so.*
+%{_libdir}/liblapacke.so.*
+%{_libdir}/libtmglib.so.*
+%if 0%{?arch64}
+%{_libdir}/liblapack64.so.*
+%{_libdir}/liblapack64_.so.*
+%endif
+%doc README.md
+%doc LICENSE
+
+%files -n %{lapack_docname}
+%{_mandir}/man3/*.3*
+%{_docdir}/%{name}/html
+%{_docdir}/%{name}/README.md
+%{_docdir}/%{name}/LICENSE
+%{_docdir}/%{name}/lapacke.pdf
+%{_docdir}/%{name}/CBLAS.md
+%{_docdir}/%{name}/lapackqref.ps
+%{_docdir}/%{name}/blasqr.ps
+
+%files -n %{lapack_devname}
+%{_includedir}/lapack*.h
+%{_libdir}/liblapack.so
+%{_libdir}/liblapacke.so
+%{_libdir}/libtmglib.so
+%{_libdir}/cmake/lapack-*
+%{_libdir}/cmake/lapacke-*
+%{_libdir}/pkgconfig/lapack.pc
+%{_libdir}/pkgconfig/lapacke.pc
+%if 0%{?arch64}
+%{_libdir}/liblapack64.so
+%{_libdir}/cmake/lapack64*
+%{_libdir}/pkgconfig/lapack64.pc
+%{_libdir}/liblapack64_.so
+%{_libdir}/pkgconfig/lapack64_.pc
+%endif
+
+%files -n %{lapack_staticdevname}
+%{_libdir}/liblapack.a
+%{_libdir}/liblapack_pic.a
+%{_libdir}/liblapacke.a
+%{_libdir}/libtmglib.a
+%if 0%{?arch64}
+%{_libdir}/liblapack64.a
+%{_libdir}/liblapack_pic64.a
+%{_libdir}/liblapack64_.a
+%{_libdir}/liblapack_pic64_.a
+%endif
+
+%files -n %{blas_libname}
+%{_libdir}/libblas.so.*
+%{_libdir}/libcblas.so.*
+%if 0%{?arch64}
+%doc README.md
+%doc LICENSE
+%{_libdir}/libblas64.so.*
+%{_libdir}/libcblas64.so.*
+%{_libdir}/libblas64_.so.*
+%{_libdir}/libcblas64_.so.*
+%endif
+
+%files -n %{blas_devname}
+%{_includedir}/cblas*.h
+%{_libdir}/libblas.so
+%{_libdir}/libcblas.so
+%{_libdir}/cmake/cblas-*
+%{_libdir}/pkgconfig/blas.pc
+%{_libdir}/pkgconfig/cblas.pc
+%if 0%{?arch64}
+%{_libdir}/libblas64.so
+%{_libdir}/libcblas64.so
+%{_libdir}/cmake/cblas64*
+%{_libdir}/pkgconfig/blas64.pc
+%{_libdir}/pkgconfig/cblas64.pc
+%{_libdir}/libblas64_.so
+%{_libdir}/libcblas64_.so
+%{_libdir}/pkgconfig/blas64_.pc
+%{_libdir}/pkgconfig/cblas64_.pc
+%endif
+
+%files -n %{blas_staticdevname}
+%{_libdir}/libblas.a
+%{_libdir}/libcblas.a
+%if 0%{?arch64}
+%{_libdir}/libblas64.a
+%{_libdir}/libcblas64.a
+%{_libdir}/libblas64_.a
+%{_libdir}/libcblas64_.a
 %endif
 
