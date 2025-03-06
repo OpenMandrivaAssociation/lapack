@@ -1,0 +1,69 @@
+diff -urN lapack-3.12.1/CMakeLists.txt lapack-3.12.1-cmake-doxygen/CMakeLists.txt
+--- lapack-3.12.1/CMakeLists.txt	2024-12-03 11:39:11.000000000 +0000
++++ lapack-3.12.1-cmake-doxygen/CMakeLists.txt	2025-03-05 02:09:51.211410764 +0000
+@@ -604,11 +604,11 @@
+     set(DOXYGEN_OUTPUT_DIRECTORY DOCS)
+     set(DOXYGEN_PROJECT_LOGO DOCS/lapack.png)
+     set(DOXYGEN_OPTIMIZE_FOR_FORTRAN YES)
+-    set(DOXYGEN_SOURCE_BROWSER YES)
++    set(DOXYGEN_SOURCE_BROWSER NO)
+     set(DOXYGEN_CREATE_SUBDIRS YES)
+     set(DOXYGEN_SEPARATE_MEMBER_PAGES YES)
+     set(DOXYGEN_TAB_SIZE 8)
+-    set(DOXYGEN_EXTRACT_ALL YES)
++    set(DOXYGEN_EXTRACT_ALL NO)
+     set(DOXYGEN_FILE_PATTERNS *.f *.f90 *.c *.h )
+     set(DOXYGEN_RECURSIVE YES)
+     set(DOXYGEN_GENERATE_TREEVIEW YES)
+@@ -631,11 +631,11 @@
+     if (BUILD_HTML_DOCUMENTATION)
+         set(DOXYGEN_GENERATE_HTML YES)
+         set(DOXYGEN_GENERATE_MAN NO)
+-        set(DOXYGEN_INLINE_SOURCES YES)
+-        set(DOXYGEN_CALL_GRAPH YES)
+-        set(DOXYGEN_CALLER_GRAPH YES)
++        set(DOXYGEN_INLINE_SOURCES NO)
++        set(DOXYGEN_CALL_GRAPH NO)
++        set(DOXYGEN_CALLER_GRAPH NO)
+ 
+-        set(DOXYGEN_HTML_OUTPUT explore-html)
++        set(DOXYGEN_HTML_OUTPUT html)
+         set(DOXYGEN_HTML_TIMESTAMP YES)
+         doxygen_add_docs(
+             html
+diff -urN lapack-3.12.1/Makefile lapack-3.12.1-cmake-doxygen/Makefile
+--- lapack-3.12.1/Makefile	2024-12-03 11:39:11.000000000 +0000
++++ lapack-3.12.1-cmake-doxygen/Makefile	2025-03-05 03:48:24.185535532 +0000
+@@ -121,11 +121,18 @@
+ html:
+ 	@echo "LAPACK HTML page generation with Doxygen"
+ 	(cat DOCS/Doxyfile; \
+-	    echo "OUTPUT_DIRECTORY=$(DOCSDIR)") | doxygen -
+-	grep '&amp;mdash' -r $(DOCSDIR)/explore-html -l | xargs perl -pi -e 's/&amp;mdash;/&mdash;/g'
++	    echo "OUTPUT_DIRECTORY = $(DOCSDIR)"; \
++	    echo "GENERATE_MAN     = NO"; \
++	    echo "GENERATE_HTML    = YES"; \
++	    echo "SOURCE_BROWSER   = NO"; \
++	    echo "CALLER_GRAPH     = NO"; \
++	    echo "INLINE_SOURCES   = NO"; \
++	    echo "HTML_OUTPUT      = html"; \
++	    echo "HTML_TIMESTAMP   = YES") | doxygen -
++	grep '&amp;mdash' -r $(DOCSDIR)/html -l | xargs perl -pi -e 's/&amp;mdash;/&mdash;/g'
+ 	@echo "=================="
+-	@echo "LAPACK HTML pages generated in $(DOCSDIR)/explore-html"
+-	@echo "Usage: open $(DOCSDIR)/explore-html/index.html"
++	@echo "LAPACK HTML pages generated in $(DOCSDIR)/html"
++	@echo "Usage: open $(DOCSDIR)/html/index.html"
+ 	@echo "Online version available at http://www.netlib.org/lapack/explore-html/"
+ 	@echo "=================="
+ 
+@@ -139,7 +146,8 @@
+ 	    echo "GENERATE_MAN     = YES"; \
+ 	    echo "CALL_GRAPH       = NO"; \
+ 	    echo "CALLER_GRAPH     = NO"; \
+-	    echo "INLINE_SOURCES   = NO") | doxygen -
++	    echo "INLINE_SOURCES   = NO"; \
++	    echo "MAN_LINKS        = YES") | doxygen -
+ 	@echo "=================="
+ 	@echo "LAPACK man pages generated in DOCS/man"
+ 	@echo "Set your MANPATH env variable accordingly"
