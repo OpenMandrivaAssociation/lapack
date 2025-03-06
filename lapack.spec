@@ -351,8 +351,8 @@ mv %_vpath_builddir-DOCS/CBLAS.md %{buildroot}%{_docdir}/%{name}
 mv %_vpath_builddir-DOCS/html %{buildroot}%{_docdir}/%{name}
 
 # remove junk manpages
-rm %_vpath_builddir-DOCS/man/man3/_home*.3
-rm %_vpath_builddir-DOCS/man/man3/__*_.3
+rm -f %_vpath_builddir-DOCS/man/man3/_home*.3
+rm -f %_vpath_builddir-DOCS/man/man3/__*_.3
 # compress manpages & remove input files after compression: 41.8 MiB => 9.44 MiB
 zstd -r --rm %_vpath_builddir-DOCS/man/man3
 # move man pages from builddir in to mandir
