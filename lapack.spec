@@ -40,6 +40,16 @@ Source0:	https://github.com/Reference-LAPACK/lapack/archive/v%{version}/%{name}-
 Source1:	https://www.netlib.org/lapack/lapackqref.ps
 Source2:	https://www.netlib.org/blas/blasqr.ps
 Source3:	https://www.netlib.org/lapack/manpages.tgz
+# (upsream)
+Patch100:	https://github.com/Reference-LAPACK/lapack/commit/3aa877584bcc96e1a0ee37742628946c56afc15f.patch
+# (upsream)
+# https://github.com/Reference-LAPACK/lapack/pull/1094/commits
+Patch101:	https://github.com/Reference-LAPACK/lapack/commit/f5103fc3b42fcff40e70b1fa4b5567df01dae9bc.patch
+# (upsream)
+# https://github.com/Reference-LAPACK/lapack/pull/1099
+Patch200:	https://github.com/Reference-LAPACK/lapack/pull/1099/commits/304fa305e85190c934e78eae75c7b092fcfd54c1.patch
+Patch201:	https://github.com/Reference-LAPACK/lapack/pull/1099/commits/bc0c38f247f90f815a93f6ca0829004120745da4.patch
+Patch202:	https://github.com/Reference-LAPACK/lapack/pull/1099/commits/3c209c6bdf524869d18d00119aeae4962740c3b3.patch
 BuildRequires:	cmake ninja
 BuildRequires:	gcc-gfortran
 
@@ -307,7 +317,7 @@ do
 		-DLAPACKE:BOOL=%{?with_lapacke:ON}%{?!with_lapacke:OFF} \
 		-DLAPACKE_WITH_TMG:BOOL=%{?with_lapacke:ON}%{?!with_lapacke:OFF} \
 		-DCBLAS:BOOL=%{?with_cblas:ON}%{?!with_cblas:OFF} \
-		-DXBLAS:BOOL=%{?with_xblas:ON}%{?!with_xblas:OFF} \
+		-DUSE_XBLAS:BOOL=%{?with_xblas:ON}%{?!with_xblas:OFF} \
 		-DBUILD_INDEX64:BOOL=$INDEX64 \
 		-DBUILD_TESTING:BOOL=%{?with_testing:ON}%{?!with_testing:OFF} \
 		-GNinja
