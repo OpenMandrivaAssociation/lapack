@@ -2,7 +2,8 @@
 %bcond cblas		1
 %bcond lapacke		1
 %bcond static		1
-%bcond testing		1
+%bcond static_pic	0
+%bcond testing		0
 %bcond xblas		0
 
 # lapack
@@ -94,13 +95,13 @@ The lapack package provides the dynamic libraries for LAPACK/BLAS.
 %files -n %{lapack_libname}
 %license LICENSE
 %{_libdir}/liblapack.so.%{major}*
-%if %{?with_lapacke}
+%if %{with lapacke}
 %{_libdir}/liblapacke.so.%{major}*
 %{_libdir}/libtmglib.so.%{major}*
 %endif
 %if 0%{?arch64}
 %{_libdir}/liblapack64.so.%{major}*
-%if %{?with_lapacke}
+%if %{with lapacke}
 %{_libdir}/liblapacke64.so.%{major}*
 %{_libdir}/libtmglib64.so.%{major}*
 %endif
@@ -123,15 +124,15 @@ necessary to develop or compile applications using lapack.
 %license LICENSE
 %{_includedir}/lapack*.h
 %{_libdir}/liblapack.so
-%if %{?with_static}
+%if %{with static}
 %{_libdir}/liblapack.a
 %endif
 %{_libdir}/pkgconfig/lapack.pc
 %{_libdir}/cmake/lapack-%{version}/lapack-*.cmake
-%if %{?with_lapacke}
+%if %{with lapacke}
 %{_libdir}/liblapacke.so
 %{_libdir}/libtmglib.so
-%if %{?with_static}
+%if %{with static}
 %{_libdir}/libtmglib.a
 %{_libdir}/liblapacke.a
 %endif
@@ -140,15 +141,15 @@ necessary to develop or compile applications using lapack.
 %endif
 %if 0%{?arch64}
 %{_libdir}/liblapack64.so
-%if %{?with_static}
+%if %{with static}
 %{_libdir}/liblapack64.a
 %endif
 %{_libdir}/pkgconfig/lapack64.pc
 %{_libdir}/cmake/lapack64-%{version}/lapack64-*.cmake
-%if %{?with_lapacke}
+%if %{with lapacke}
 %{_libdir}/liblapacke64.so
 %{_libdir}/libtmglib64.so
-%if %{?with_static}
+%if %{with static}
 %{_libdir}/libtmglib64.a
 %{_libdir}/liblapacke64.a
 %endif
@@ -186,12 +187,12 @@ pages for blas are available in the blas-man package.
 %files -n %{blas_libname}
 %license LICENSE
 %{_libdir}/libblas.so.%{major}*
-%if %{?with_cblas}
+%if %{with cblas}
 %{_libdir}/libcblas.so.%{major}*
 %endif
 %if 0%{?arch64}
 %{_libdir}/libblas64.so.%{major}*
-%if %{?with_cblas}
+%if %{with cblas}
 %{_libdir}/libcblas64.so.%{major}*
 %endif
 %endif
@@ -211,15 +212,15 @@ BLAS development libraries for applications that link statically.
 %files -n %{blas_devname}
 %license LICENSE
 %{_libdir}/libblas.so
-%if %{?with_static}
+%if %{with static}
 %{_libdir}/libblas.a
 %endif
 %{_libdir}/pkgconfig/blas.pc
 
-%if %{?with_cblas}
+%if %{with cblas}
 %{_includedir}/cblas*.h
 %{_libdir}/libcblas.so
-%if %{?with_static}
+%if %{with static}
 %{_libdir}/libcblas.a
 %endif
 %{_libdir}/pkgconfig/cblas.pc
@@ -228,14 +229,14 @@ BLAS development libraries for applications that link statically.
 
 %if 0%{?arch64}
 %{_libdir}/libblas64.so
-%if %{?with_static}
+%if %{with static}
 %{_libdir}/libblas64.a
 %endif
 %{_libdir}/pkgconfig/blas64.pc
 
-%if %{?with_cblas}
+%if %{with cblas}
 %{_libdir}/libcblas64.so
-%if %{?with_static}
+%if %{with static}
 %{_libdir}/libcblas64.a
 %endif
 %{_libdir}/pkgconfig/cblas64.pc
@@ -260,7 +261,6 @@ Man pages / documentation for BLAS.
 
 %prep
 %autosetup -p1 -a3
-
 cp %{SOURCE1} lapackqref.ps
 cp %{SOURCE2} blasqr.ps
 
@@ -388,7 +388,7 @@ cp -f blas/man/man3/* %{buildroot}%{_mandir}/man3
 cp -f man/man3/* %{buildroot}%{_mandir}/man3
 
 %check
-%if %{?with_testing}
+%if %{with testing}
 for d in {SHARED%{?with_static:,STATIC}%{?with_static_pic:,STATIC_PIC}}%{?arch64:{,64}}
 do
 	ln -fs %_vpath_builddir-$d build
