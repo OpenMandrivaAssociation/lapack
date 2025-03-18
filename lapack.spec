@@ -1,7 +1,7 @@
 %bcond deprecated	1
 %bcond cblas		1
 %bcond lapacke		1
-%bcond static		0
+%bcond static		1
 %bcond static_pic	0
 %bcond testing		1
 %bcond xblas		0
