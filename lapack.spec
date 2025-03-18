@@ -1,10 +1,11 @@
 %bcond deprecated	1
 %bcond cblas		1
 %bcond lapacke		1
-%bcond static		1
+%bcond static		0
 %bcond static_pic	0
-%bcond testing		0
+%bcond testing		1
 %bcond xblas		0
+%bcond doc		1
 
 # lapack
 %define major 3
@@ -34,7 +35,7 @@ Summary:	LAPACK libraries for linear algebra
 Name:		lapack
 Version:	3.12.1
 Release:	1
-License:	BSD-like
+License:	BSD-3-Clause-Open-MPI
 Group:		Sciences/Mathematics
 Url:		https://www.netlib.org/lapack/
 Source0:	https://github.com/Reference-LAPACK/lapack/archive/v%{version}/%{name}-%{version}.tar.gz
@@ -42,10 +43,13 @@ Source1:	https://www.netlib.org/lapack/lapackqref.ps
 Source2:	https://www.netlib.org/blas/blasqr.ps
 Source3:	https://www.netlib.org/lapack/manpages.tgz
 # (upsream)
-Patch100:	https://github.com/Reference-LAPACK/lapack/commit/3aa877584bcc96e1a0ee37742628946c56afc15f.patch
+# https://github.com/Reference-LAPACK/lapack/pull/1095
+Patch100:	https://github.com/Reference-LAPACK/lapack/pull/1095/commits/3e242fc8d5d38f0425c6018fe88abf31e1a9e80f.patch
+# (upsream)
+Patch101:	https://github.com/Reference-LAPACK/lapack/commit/3aa877584bcc96e1a0ee37742628946c56afc15f.patch
 # (upsream)
 # https://github.com/Reference-LAPACK/lapack/pull/1094/commits
-Patch101:	https://github.com/Reference-LAPACK/lapack/commit/f5103fc3b42fcff40e70b1fa4b5567df01dae9bc.patch
+Patch102:	https://github.com/Reference-LAPACK/lapack/commit/f5103fc3b42fcff40e70b1fa4b5567df01dae9bc.patch
 # (upsream)
 # https://github.com/Reference-LAPACK/lapack/pull/1099
 Patch200:	https://github.com/Reference-LAPACK/lapack/pull/1099/commits/304fa305e85190c934e78eae75c7b092fcfd54c1.patch
@@ -93,7 +97,6 @@ is coded in Fortran77 and built with gcc.
 The lapack package provides the dynamic libraries for LAPACK/BLAS.
 
 %files -n %{lapack_libname}
-%license LICENSE
 %{_libdir}/liblapack.so.%{major}*
 %if %{with lapacke}
 %{_libdir}/liblapacke.so.%{major}*
@@ -185,7 +188,6 @@ provides a number of basic algorithms for numerical algebra. Man
 pages for blas are available in the blas-man package.
 
 %files -n %{blas_libname}
-%license LICENSE
 %{_libdir}/libblas.so.%{major}*
 %if %{with cblas}
 %{_libdir}/libcblas.so.%{major}*
@@ -320,6 +322,8 @@ do
 		-DUSE_XBLAS:BOOL=%{?with_xblas:ON}%{?!with_xblas:OFF} \
 		-DBUILD_INDEX64:BOOL=$INDEX64 \
 		-DBUILD_TESTING:BOOL=%{?with_testing:ON}%{?!with_testing:OFF} \
+		-DBUILD_MAN_DOCUMENTATION:BOOL=%{?with_doc:ON}%{?!with_doc:OFF} \
+		-DBUILD_HTML_DOCUMENTATION:BOOL=%{?with_doc:ON}%{?!with_doc:OFF} \
 		-GNinja
 	%ninja_build
 
@@ -375,14 +379,12 @@ ztbmv.f.3 ztbmv.3 ztbsv.f.3 ztbsv.3 ztpmv.f.3 ztpmv.3 ztpsv.f.3 ztpsv.3 ztrmm.f.
 ztrmv.f.3 ztrmv.3 ztrsm.f.3 ztrsm.3 ztrsv.f.3 ztrsv.3 ../../blas/man/man3
 cd ../..
 
-find blas/man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > blas-man-pages
-
 # remove weird man pages
-cd man/man3
-rm -rf _Users_julie*
-cd -
+rm -rf +man/man3/_Users_julie*
 
-find man/man3 -type f -printf "%{_mandir}/man3/%f*\n" > lapack-man-pages
+find man/man3 -type f -printf "%{_mandir}/man3/%f.zst\n" > lapack-man-pages
+find blas/man/man3 -type f -printf "%{_mandir}/man3/%f.zst\n" > blas-man-pages
+
 
 cp -f blas/man/man3/* %{buildroot}%{_mandir}/man3
 cp -f man/man3/* %{buildroot}%{_mandir}/man3
@@ -393,7 +395,7 @@ for d in {SHARED%{?with_static:,STATIC}%{?with_static_pic:,STATIC_PIC}}%{?arch64
 do
 	ln -fs %_vpath_builddir-$d build
 	pushd build
-	ctest
+	LD_LIBRARY_PATH=%{buildroot}%{_libdir}:$LD_LIBRARY_PATH ctest
 	popd 1>/dev/null
 	rm build
 done
